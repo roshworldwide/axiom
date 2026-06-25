@@ -162,14 +162,18 @@ violations:
 | Freshness under bounded clock skew | `AcousticAuthProofs.tla` | 3 |
 
 **Property testing (proptest).** 31 property tests at 256–500 cases each
-(8,912 generated cases), plus 20 concrete unit/integration tests — 51 test
+(8,912 generated cases), plus 24 concrete unit/integration tests — 55 test
 functions total, all passing under `-D warnings`. Properties include partial-
 order laws of the vector clock, the four CRDTs' convergence/commutativity/
 idempotence, op-based convergence under arbitrary network reordering through
 CBCAST, and MessagePack round-trips.
 
-**Trace replay (trace-validated).** One TLC-pinned G-Counter trace replays on the
-implementation and matches the spec-computed final state.
+**Trace replay (trace-validated).** TLC-pinned op traces for the G-Counter,
+OR-Set, and RGA replay on the implementation and match the spec-computed final
+state — compared at each type's observable abstraction (component counts, set
+membership, and the visible id sequence + tombstones, respectively), with the
+trace's ids fed into the RGA so the tie-break matches the spec. Each has a
+negativity check (perturbing the trace makes the match fail).
 
 **Non-vacuity.** For OR-Set, RGA, and each acoustic-auth defense, we ran
 deliberately-false invariants and confirmed TLC produces a concrete
@@ -227,8 +231,9 @@ We state precisely what is **not** established:
 - **TLAPS covers two narrow lemmas only** — G-Counter merge commutativity and the
   freshness arithmetic — not whole data types or the protocol.
 - **The refinement mapping is validated, not verified.** That `tla_state()`
-  faithfully abstracts the implementation is supported by property tests and one
-  trace, not proved; trace replay currently covers the G-Counter.
+  faithfully abstracts the implementation is supported by property tests and
+  TLC-pinned traces, not proved; trace replay covers the G-Counter, OR-Set, and
+  RGA.
 - **The security case study abstracts physics.** Acoustic environments are opaque
   constants; the relay result is conditional on an unmodeled physical assumption.
 - **Bounded model sizes.** State counts (~62k) are evidence within the stated

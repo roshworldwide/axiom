@@ -11,7 +11,7 @@ block at the bottom of this file.
 
 ## TLA+ modules
 
-`ls tla/*.tla tla/traces/*.tla` → **10 modules**, classified:
+`ls tla/*.tla tla/traces/*.tla` → **12 modules**, classified:
 
 | Module | Role | Has `.cfg`? |
 |--------|------|-------------|
@@ -22,6 +22,8 @@ block at the bottom of this file.
 | `RGA.tla` | model-checked spec (CRDT) | yes |
 | `AcousticAuth.tla` | model-checked spec (protocol) | yes |
 | `GCounterTrace.tla` | trace scenario (model-checked via `TraceMatches`) | yes (`traces/`) |
+| `ORSetTrace.tla` | trace scenario (model-checked) | yes (`traces/`) |
+| `RGATrace.tla` | trace scenario (model-checked) | yes (`traces/`) |
 | `GCounterProofs.tla` | TLAPS proof | no |
 | `AcousticAuthProofs.tla` | TLAPS proof | no |
 | `GCounterBase.tla` | shared helper (merge math) | no |
@@ -30,7 +32,7 @@ block at the bottom of this file.
   PNCounter, ORSet, RGA, AcousticAuth.
 - **4 CRDTs**: G-Counter, PN-Counter, OR-Set, RGA. (`Counter` is a warm-up;
   `AcousticAuth` is a protocol, not a CRDT.)
-- **2 TLAPS proof modules**; **1 shared helper**; **1 trace scenario**.
+- **2 TLAPS proof modules**; **1 shared helper**; **3 trace scenarios**.
 
 ## Model-checked (TLC, bounded) — distinct states
 
@@ -48,7 +50,9 @@ Command (per spec, from `tla/`):
 | `AcousticAuth` | 16,853 |
 | **Total across the 6 spec models** | **62,039** |
 | `GCounterTrace` scenario | 8 |
-| **Total TLC states (incl. scenario)** | **62,047** |
+| `ORSetTrace` scenario | 11 |
+| `RGATrace` scenario | 9 |
+| **Total TLC states (incl. scenarios)** | **62,067** |
 
 ## Machine-proved (TLAPS, unbounded) — obligations
 
@@ -65,9 +69,9 @@ Docker — there is no arm64 `tlapm`). Tool: tlapm **1.6.0-pre**, Z3 backend.
 
 Command: `cargo test --workspace` (rustc stable; `-D warnings`).
 
-- **51 test functions**, all passing: 50 in the `axiom-core` lib unit tests +
-  1 integration test (`tests/trace_replay.rs`). (`cargo test` output.)
-- Of the 51: **31 are proptest properties**; **20 are concrete unit/integration
+- **55 test functions**, all passing: 50 in the `axiom-core` lib unit tests +
+  5 integration tests (`tests/trace_replay.rs`). (`cargo test` output.)
+- Of the 55: **31 are proptest properties**; **24 are concrete unit/integration
   tests**. (Count of `#[test]` inside `proptest! { }` blocks vs outside.)
 - proptest **cases**: 27 properties at the default 256 cases + 4 properties at
   500 cases (`axiom_verify.rs`, `ProptestConfig::with_cases(500)`):
@@ -77,10 +81,18 @@ Command: `cargo test --workspace` (rustc stable; `-D warnings`).
 
 ## Trace-validated
 
-- **G-Counter only.** `crates/axiom-core/tests/trace_replay.rs` replays the ops
-  from `tla/traces/GCounterTrace.tla` (whose `Expected` final state is pinned by
-  TLC via the `TraceMatches` invariant) and matches `tla_state()`.
-- _(PART B extends this to OR-Set and RGA, or scopes the claim honestly.)_
+`crates/axiom-core/tests/trace_replay.rs` replays TLC-pinned op traces — each
+`tla/traces/<Crdt>Trace.tla` asserts `Done => observable = Expected`, so a clean
+TLC run pins the expected state:
+- **G-Counter** — per-replica component counts (`GCounterTrace.tla`).
+- **OR-Set** — per-replica membership / live elements (`ORSetTrace.tla`); tag
+  encoding (Uuid vs `<<replica,counter>>`) is abstracted away.
+- **RGA** — the visible id sequence + tombstone set (`RGATrace.tla`); the trace's
+  `<<counter,replica>>` ids are fed into the impl (`insert_after_with_id`) so the
+  id tie-break matches the spec's.
+
+Each has a **negativity check** (perturb the trace → the match fails), confirming
+the positive tests are not vacuous.
 
 ## Code size
 
@@ -107,7 +119,7 @@ enforces it so the headline numbers can't silently diverge.
 - 4 CRDTs
 - 2 TLAPS proofs
 - 14 obligations
-- 51 test functions
+- 55 test functions
 - 31 property tests
 - 8,912 generated cases
 <!-- HEADLINE-END -->

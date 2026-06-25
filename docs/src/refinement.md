@@ -48,4 +48,4 @@ The crucial property is that **neither side derives the expected state from the 
 
 ## Scope
 
-Trace replay currently covers the G-Counter — the canonical case, because counts compare directly with no tag or representation mismatch. The same mechanism extends to the other CRDTs by comparing at their observable abstraction (set membership for `tla/ORSet.tla`, the visible sequence for `tla/RGA.tla`) rather than raw internal state. Property tests on `tla_state()`, by contrast, already span the full suite.
+Trace replay covers the G-Counter (component counts compare directly), the OR-Set (per-replica **membership**, so the Uuid-vs-`<<replica,counter>>` tag encoding is irrelevant), and the RGA (the **visible id sequence** plus tombstone set, with the trace's `<<counter,replica>>` ids fed into the implementation via `insert_after_with_id` so the id tie-break matches the spec's). Each comparison is at the type's observable abstraction, never raw internal encoding, and each has a negativity check: perturb the trace — drop the OR-Set's concurrent re-add, or the RGA's delete — and the match fails, proving the positive tests are not vacuous.

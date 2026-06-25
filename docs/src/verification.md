@@ -8,10 +8,10 @@ The discipline behind this chapter is simple: every assurance term means exactly
 
 | Level | What it means | What Axiom has |
 |-------|---------------|----------------|
-| **model-checked (TLC, bounded)** | Exhaustive state exploration up to stated finite bounds — every reachable state checked, no violation found | All five CRDT specs plus the acoustic-auth model: 62,039 distinct states across the suite |
+| **model-checked (TLC, bounded)** | Exhaustive state exploration up to stated finite bounds — every reachable state checked, no violation found | All six model-checked specs (the warm-up Counter, the four CRDTs, and the acoustic-auth model): 62,039 distinct states across the suite |
 | **machine-proved (TLAPS)** | A deductive, *unbounded* proof — holds for all inputs, no finite bound | Two narrow lemmas, 14 proof obligations total |
-| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 8,912 generated cases (plus 51 test functions overall) |
-| **trace-validated** | A TLC-pinned execution trace replayed on the Rust impl, matching the spec's state | The G-Counter |
+| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 8,912 generated cases (plus 55 test functions overall) |
+| **trace-validated** | A TLC-pinned execution trace replayed on the Rust impl, matching the spec's state | G-Counter, OR-Set, RGA |
 
 ### Model-checked (TLC, bounded)
 
@@ -43,7 +43,7 @@ The Rust core in `crates/axiom-core` is exercised by 31 property tests over 8,91
 
 ### Trace-validated
 
-`crates/axiom-core/tests/trace_replay.rs` takes a TLC-pinned G-Counter trace and replays it through the Rust implementation, confirming the code reproduces the spec's state via the `tla_state()` refinement mapping. This currently covers the G-Counter only.
+`crates/axiom-core/tests/trace_replay.rs` takes TLC-pinned traces for the G-Counter, OR-Set, and RGA and replays them through the Rust implementation, confirming the code reproduces each spec's state via the `tla_state()` refinement mapping. Each is compared at the type's observable abstraction (component counts, set membership, the visible id sequence + tombstones), and each carries a negativity check: perturbing the trace makes the match fail, so the positive tests are not vacuous.
 
 ## What is NOT claimed
 
@@ -51,7 +51,7 @@ Read this section as carefully as the table above.
 
 - **No unbounded proof of CRDT convergence.** Convergence is model-checked within finite bounds and property-tested — not proved. There is no TLAPS theorem saying "all replicas converge for all schedules."
 - **TLAPS covers only two narrow lemmas.** Merge commutativity and freshness arithmetic. It does not cover whole protocols, the OR-Set, the RGA, or end-to-end safety.
-- **Refinement is validated, not verified.** The link between spec and Rust rests on trace replay (G-Counter only) and the `tla_state()` mapping — evidence the code tracks the spec, not a machine-checked refinement proof.
+- **Refinement is validated, not verified.** The link between spec and Rust rests on trace replay (G-Counter, OR-Set, RGA) and the `tla_state()` mapping — evidence the code tracks the spec, not a machine-checked refinement proof.
 - **The security study abstracts the physics.** Acoustic-auth models a fingerprint as an opaque constant. TLC shows the protocol *logic* rejects replays and relays *given* that fingerprints are environment-bound. It does not justify that physical assumption.
 - **Model sizes are bounded and small.** RGA uses 2 replicas and no symmetry (its total-order tie-break makes replicas distinguishable, so symmetry would be unsound). A bounded result shows no violation *within those bounds* — nothing beyond them.
 

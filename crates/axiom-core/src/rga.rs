@@ -155,6 +155,25 @@ impl<T> Rga<T> {
         id
     }
 
+    /// Insert `content` after `after` with an EXTERNALLY-SUPPLIED `id`, instead
+    /// of minting one from the clock. For replaying an ordered operation log or
+    /// trace whose ids were assigned elsewhere (a TLA+ trace, or a remote
+    /// replica's insert). The caller guarantees `id` is globally unique; the
+    /// clock is left untouched.
+    pub fn insert_after_with_id(&mut self, id: ElementId, after: Option<ElementId>, content: T) {
+        debug_assert!(
+            after.is_none_or(|p| self.elements.contains_key(&p)),
+            "insert_after_with_id: `after` must be None or an existing element"
+        );
+        self.elements.insert(
+            id,
+            Node {
+                content,
+                predecessor: after,
+            },
+        );
+    }
+
     /// Insert `content` at visible position `index` (clamped to the end).
     /// Returns the new element's id.
     pub fn insert(&mut self, index: usize, content: T) -> ElementId {
