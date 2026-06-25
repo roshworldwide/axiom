@@ -54,6 +54,34 @@ Command (per spec, from `tla/`):
 | `RGATrace` scenario | 9 |
 | **Total TLC states (incl. scenarios)** | **62,067** |
 
+This is the **bounded subset checked on every commit** (kept fast). A separate,
+documented **large-scale run** explores far more — see the next section.
+
+## Large-scale TLC run (coverage; not in per-commit CI)
+
+Command: `evaluation/large_run.sh` (also runnable via the manual / nightly
+`.github/workflows/large-tlc.yml`). Widened models in `evaluation/configs/`;
+full raw TLC output in `evaluation/large_run.md`. Reference run on **Apple M3,
+8 cores, 16 GiB RAM**, TLC **2.19** (tla2tools v1.7.4), JVM 17 `-Xmx10g`,
+`-workers auto`. Each model is explored to completion ("No error has been found").
+
+| Model | Bounds (symmetry over replicas) | Distinct states |
+|-------|---------------------------------|----------------:|
+| `GCounter` | 3 replicas, MaxIncrements=13 | 142,934,260 |
+| `PNCounter` | 3 replicas, MaxOps=3 | 48,201,700 |
+| `ORSet` | 3 replicas, 2 elements, MaxAdds=2 | 19,902,877 |
+| **Cumulative** | | **211,038,837** |
+
+- **≥ 1e8 distinct states explored in a documented large-scale run on Apple M3 /
+  16 GiB** — both as a **single model** (GCounter, **1.43 × 10⁸**) and
+  **cumulatively** (**2.11 × 10⁸**). Per-commit CI checks only the bounded
+  ~62K subset above.
+- **Claim class:** *model-checked (TLC, bounded)* — larger bounds, still bounded.
+  **State count is a coverage proxy, not proof strength**: a bigger count widens
+  the search for counterexamples but does NOT upgrade "model-checked" to
+  "proved." The unbounded guarantees come from the TLAPS lemmas; the Rust↔spec
+  link from trace-replay.
+
 ## Machine-proved (TLAPS, unbounded) — obligations
 
 Command: `tlapm tla/<M>Proofs.tla` (Linux x86_64; locally via `linux/amd64`
@@ -105,8 +133,9 @@ the positive tests are not vacuous.
 ## Docs & CI
 
 - mdBook chapters: **11** (`ls docs/src/*.md` minus `SUMMARY.md`).
-- CI jobs: **5** in `ci.yml` (rust, tlc, tlaps, python, book) + **2** in
-  `pages.yml` (build, deploy).
+- CI jobs: **6** in `ci.yml` (rust, tlc, tlaps, python, book, metrics) + **2**
+  in `pages.yml` (build, deploy) + **1** in `large-tlc.yml` (large-scale TLC,
+  **manual / nightly only — not per-commit**).
 
 ---
 
