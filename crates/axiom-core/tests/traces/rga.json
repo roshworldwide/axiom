@@ -1,0 +1,16 @@
+{
+  "crdt": "rga",
+  "replicas": [1, 2],
+  "ops": [
+    { "op": "insert", "r": 1, "id": [0, 1], "after": null },
+    { "op": "merge", "r": 2, "s": 1 },
+    { "op": "insert", "r": 1, "id": [1, 1], "after": [0, 1] },
+    { "op": "insert", "r": 2, "id": [0, 2], "after": [0, 1] },
+    { "op": "merge", "r": 1, "s": 2 },
+    { "op": "merge", "r": 2, "s": 1 },
+    { "op": "delete", "r": 1, "target": [1, 1] },
+    { "op": "merge", "r": 2, "s": 1 }
+  ],
+  "expected_visible": [[0, 1], [0, 2]],
+  "expected_tombstones": [[1, 1]]
+}

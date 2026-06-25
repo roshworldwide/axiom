@@ -1,0 +1,18 @@
+{
+  "crdt": "orset",
+  "replicas": [1, 2],
+  "elements": [1, 2],
+  "ops": [
+    { "op": "add", "r": 1, "x": 1 },
+    { "op": "merge", "r": 2, "s": 1 },
+    { "op": "add", "r": 1, "x": 1 },
+    { "op": "remove", "r": 2, "x": 1 },
+    { "op": "merge", "r": 1, "s": 2 },
+    { "op": "merge", "r": 2, "s": 1 },
+    { "op": "add", "r": 2, "x": 2 },
+    { "op": "merge", "r": 1, "s": 2 },
+    { "op": "remove", "r": 1, "x": 2 },
+    { "op": "merge", "r": 2, "s": 1 }
+  ],
+  "expected_membership": { "1": [1], "2": [1] }
+}

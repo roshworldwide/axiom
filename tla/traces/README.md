@@ -22,7 +22,9 @@ Run locally from the `tla/` directory so `GCounterBase` resolves:
 java -cp tla2tools.jar tlc2.TLC -config traces/GCounterTrace.cfg traces/GCounterTrace.tla
 ```
 
-**Coverage:** `GCounter` (the canonical example — counts compare directly with
-no tag/representation mismatch). The same mechanism extends to the other CRDTs
-by comparing at their observable abstraction (counter value, set membership,
-visible sequence) rather than raw internal state.
+**Coverage:** `GCounterTrace` (component counts), `ORSetTrace` (per-replica
+membership — so the Uuid-vs-`<<replica,counter>>` tag encoding is irrelevant),
+and `RGATrace` (the visible id sequence + tombstone set, with the trace's
+`<<counter,replica>>` ids fed into the impl so the id tie-break matches the
+spec). Each is compared at the type's observable abstraction, never raw internal
+encoding, and each Rust replay carries a negativity check.
