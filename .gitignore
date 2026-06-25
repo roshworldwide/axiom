@@ -1,0 +1,44 @@
+# ── Rust ────────────────────────────────────────────────────────────────
+/target/
+**/target/
+**/*.rs.bk
+# Axiom-core is a library; lockfile is regenerated. Re-enable if we add binaries.
+/Cargo.lock
+
+# ── TLA+ / TLC model checker ────────────────────────────────────────────
+# The tools jar is downloaded by CI / SETUP.md, never committed.
+tla2tools.jar
+*.jar
+# TLC scratch + generated state graphs
+states/
+*.toolbox/
+*_TTrace_*.tla
+*_TTrace_*.bin
+*.dot
+*.st
+*.fp
+MC.out
+
+# ── TLAPS (TLA+ Proof System) ───────────────────────────────────────────
+*.tlaps/
+.tlacache/
+_tlapm_*
+
+# ── Python / PyO3 / maturin (Phase 4) ───────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.so
+*.pyd
+/dist/
+/wheels/
+**/*.egg-info/
+
+# ── mdBook (Phase 4) ────────────────────────────────────────────────────
+/docs/book/
+
+# ── Editors / OS ────────────────────────────────────────────────────────
+.DS_Store
+*.swp
+.idea/

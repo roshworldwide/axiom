@@ -1,0 +1,12 @@
+[package]
+name = "axiom-core"
+description = "Formally specified CRDTs with explicit refinement mappings to TLA+ specs."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+
+[dev-dependencies]

@@ -1,0 +1,7 @@
+# Pin the Rust toolchain so local builds and CI agree.
+# `stable` tracks the latest stable release; components are required for the
+# fmt + clippy gates enforced in CI.
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

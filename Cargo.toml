@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["crates/axiom-core"]
+
+# Shared metadata inherited by member crates via `field.workspace = true`.
+[workspace.package]
+version = "0.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/RoSh/axiom"
+authors = ["RoSh and the Axiom contributors"]
+
+# Dependency versions are declared centrally and added per phase as needed
+# (see CLAUDE.md). The workspace starts with none so the scaffold builds clean.
+[workspace.dependencies]
