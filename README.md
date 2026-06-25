@@ -63,6 +63,22 @@ We never write "proven correct" without a TLAPS proof behind it. We prefer
 understatement. A full "Verification" section is added once implementation
 lands (Phase 2, Week 10).
 
+## Python
+
+[`crates/axiom-py`](crates/axiom-py) exposes the CRDTs to Python via PyO3 +
+maturin — for multi-agent / multi-process systems (LangChain, AutoGen, …) that
+need coordinator-free shared state:
+
+```python
+from axiom import GCounter, ORSet, RGA
+a = GCounter(1); b = GCounter(2)
+a.increment(); b.increment()
+b.merge(GCounter.from_bytes(a.to_bytes()))   # exchange + merge
+```
+
+See the [Python quickstart](crates/axiom-py/README.md) (`maturin develop` to
+build).
+
 ## License
 
 Dual-licensed under either of [Apache-2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT)

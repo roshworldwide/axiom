@@ -34,7 +34,8 @@ axiom/
 ├── tla/                       # TLA+ specs + .cfg model files + SETUP.md
 ├── crates/
 │   └── axiom-core/            # the CRDTs, vector clock, causal broadcast
-├── crates/axiom-py/           # (Phase 4) PyO3 bindings
+├── crates/axiom-py/           # PyO3 bindings — DETACHED workspace (own [workspace]),
+│                              #   built via maturin, NOT part of root cargo build/CI rust job
 ├── docs/                      # (Phase 4) "The Axiom Book" (mdBook)
 └── paper/                     # (Phase 4) the paper
 ```
