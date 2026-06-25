@@ -37,11 +37,15 @@
 #![forbid(unsafe_code)]
 
 pub mod gcounter;
+pub mod hlc;
 pub mod orset;
 pub mod pncounter;
+pub mod rga;
 pub mod vector_clock;
 
 pub use gcounter::{GCounter, GCounterOp, TlaGCounterState};
+pub use hlc::{Hlc, HlcClock};
 pub use orset::{ORSet, ORSetOp, TlaORSetState};
 pub use pncounter::{PNCounter, PNCounterOp, TlaPNCounterState};
+pub use rga::{ElementId, Rga, TlaRgaState};
 pub use vector_clock::{ReplicaId, VectorClock};
