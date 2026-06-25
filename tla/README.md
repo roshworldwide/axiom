@@ -17,7 +17,7 @@ This directory holds the formal models that the Rust implementation refines.
 | `GCounter.tla` | 1 · Wk 2 | grow-only counter | ✅ model-checked (TLC) · ✅ machine-proved (TLAPS) |
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | ✅ model-checked (TLC) |
-| `RGA.tla` | 1 · Wk 4 | replicated growable array | _pending_ |
+| `RGA.tla` | 1 · Wk 4 | replicated growable array | ✅ model-checked (TLC) |
 | `AcousticAuth.tla` | 3 | acoustic auth protocol | _pending_ |
 
 Helper / proof modules (no `.cfg`, so not directly model-checked):
@@ -64,6 +64,11 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | `GCounter.tla` | 3 replicas, `MaxIncrements = 2`, `SYMMETRY` | 480 distinct (4,849 generated), depth 13, no error |
 | `PNCounter.tla` | 3 replicas, `MaxOps = 1`, `SYMMETRY` | 2,020 distinct (20,893 generated), depth 13, no error |
 | `ORSet.tla` | 3 replicas, 2 elements, `MaxAdds = 1`, `SYMMETRY` | 7,239 distinct (115,296 generated), depth 14, no error |
+| `RGA.tla` | **2 replicas, no symmetry**, `MaxInserts = 2` | 35,441 distinct (278,273 generated), depth 13, no error |
+
+`RGA.tla` deliberately does **not** use symmetry: its tie-break is a total order
+on ids (hence on replica identifiers), which makes replicas distinguishable, so
+symmetry reduction would be unsound. It is bounded tightly instead (2 replicas).
 
 The OR-Set `TombstonesObserved` invariant is non-vacuous: a throwaway negative
 check (assert a tombstoned element is always absent) yields a 5-step
