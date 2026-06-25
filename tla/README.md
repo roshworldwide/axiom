@@ -16,7 +16,7 @@ This directory holds the formal models that the Rust implementation refines.
 | `Counter.tla` | 1 · Wk 1 | toolchain warm-up | ✅ model-checked (TLC) |
 | `GCounter.tla` | 1 · Wk 2 | grow-only counter | ✅ model-checked (TLC) · ✅ machine-proved (TLAPS) |
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
-| `ORSet.tla` | 1 · Wk 3 | observed-remove set | _pending_ |
+| `ORSet.tla` | 1 · Wk 3 | observed-remove set | ✅ model-checked (TLC) |
 | `RGA.tla` | 1 · Wk 4 | replicated growable array | _pending_ |
 | `AcousticAuth.tla` | 3 | acoustic auth protocol | _pending_ |
 
@@ -63,3 +63,10 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | `Counter.tla` | `CONSTRAINT counter <= 5` | 6 distinct states (13 generated), depth 6, no error |
 | `GCounter.tla` | 3 replicas, `MaxIncrements = 2`, `SYMMETRY` | 480 distinct (4,849 generated), depth 13, no error |
 | `PNCounter.tla` | 3 replicas, `MaxOps = 1`, `SYMMETRY` | 2,020 distinct (20,893 generated), depth 13, no error |
+| `ORSet.tla` | 3 replicas, 2 elements, `MaxAdds = 1`, `SYMMETRY` | 7,239 distinct (115,296 generated), depth 14, no error |
+
+The OR-Set `TombstonesObserved` invariant is non-vacuous: a throwaway negative
+check (assert a tombstoned element is always absent) yields a 5-step
+counterexample where two replicas add the same element concurrently, one removes
+it, and after merge the other replica's concurrently-added tag survives — i.e.
+the **Add wins** over the concurrent Remove.
