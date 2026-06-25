@@ -18,10 +18,11 @@ This directory holds the formal models that the Rust implementation refines.
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | ✅ model-checked (TLC) |
 | `RGA.tla` | 1 · Wk 4 | replicated growable array | ✅ model-checked (TLC) |
-| `AcousticAuth.tla` | 3 · Wk 11–13 | acoustic auth protocol | ✅ model-checked (TLC, replay + relay attacker) |
+| `AcousticAuth.tla` | 3 · Wk 11–14 | acoustic auth protocol | ✅ model-checked (TLC, attacker + skew) · ✅ TLAPS freshness lemma |
 
 Helper / proof modules (no `.cfg`, so not directly model-checked):
-`GCounterBase.tla` (shared merge math), `GCounterProofs.tla` (TLAPS proof).
+`GCounterBase.tla` (shared merge math), `GCounterProofs.tla` and
+`AcousticAuthProofs.tla` (TLAPS proofs).
 
 ## Machine-checked proofs (TLAPS)
 
@@ -31,6 +32,7 @@ inputs (no finite bound):
 | Theorem | Module | Tool | Result |
 |---------|--------|------|--------|
 | G-Counter merge is commutative — `MergeVec(u, v) = MergeVec(v, u)` for all `u, v ∈ [Replicas → Nat]` | `GCounterProofs.tla` | `tlapm` 1.6.0-pre (Z3 4.8.9) | ✅ **all 11 obligations proved** |
+| Freshness under clock skew — a clock `≤ MaxSkew` behind accepting a token as fresh ⟹ real age `< TTL + MaxSkew` | `AcousticAuthProofs.tla` | `tlapm` 1.6.0-pre (Z3 4.8.9) | ✅ **all 3 obligations proved** |
 
 The merge operator (`MergeVec`) is defined once in `GCounterBase.tla`, which
 both `GCounter.tla` (model checking) and `GCounterProofs.tla` (the proof) extend
@@ -70,6 +72,16 @@ enabled — a relayed token is never accepted in a foreign environment. Removing
 the `env[t] = v` conjunct makes TLC find a relay that succeeds, confirming the
 check is load-bearing.
 
+**Freshness under skew (Week 14).** A verifier's clock may run up to `MaxSkew`
+behind real time, and it checks freshness with its own clock. TLC confirms
+`Freshness` — an accepted token's *real* age is always `< TTL + MaxSkew` — across
+the full attacker + skew model (16,853 states). The bound is tight: a check
+ignoring skew (`< TTL`) is refuted by a behind-clock verifier accepting a token
+of real age `TTL`. Beyond the bounded TLC result, the arithmetic core is
+**machine-proved with TLAPS** (`AcousticAuthProofs.tla`, all 3 obligations) for
+*all* integer times, TTLs, and skews — the one unbounded result in the case
+study.
+
 **Honest abstraction.** This is a result about the protocol's *logic*, not about
 acoustics. We assume a token's fingerprint cannot be reproduced in a different
 environment (modeled by distinct opaque constants); TLC verifies the protocol
@@ -99,7 +111,7 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | `ORSet.tla` | 3 replicas, 2 elements, `MaxAdds = 1`, `SYMMETRY` | 7,239 distinct (115,296 generated), depth 14, no error |
 | `RGA.tla` | **2 replicas, no symmetry**, `MaxInserts = 2` | 35,441 distinct (278,273 generated), depth 13, no error |
 | `AcousticAuth.tla` (honest) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, no attacker | 4,109 distinct (8,350 generated), depth 11, no error |
-| `AcousticAuth.tla` (replay + relay) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `Replay = Relay = TRUE` | 15,957 distinct (65,014 generated), depth 13, no error |
+| `AcousticAuth.tla` (attacker + skew) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `MaxSkew = 1`, `Replay = Relay = TRUE` | 16,853 distinct (76,194 generated), depth 13, no error |
 
 `RGA.tla` deliberately does **not** use symmetry: its tie-break is a total order
 on ids (hence on replica identifiers), which makes replicas distinguishable, so
