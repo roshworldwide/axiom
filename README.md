@@ -63,6 +63,17 @@ We never write "proven correct" without a TLAPS proof behind it. We prefer
 understatement. A full "Verification" section is added once implementation
 lands (Phase 2, Week 10).
 
+## Documentation
+
+- **[The Axiom Book](docs/)** — long-form docs (mdBook): CRDTs from scratch, TLA+
+  from scratch, and the refinement mapping; each data-type chapter links to the
+  TLA+ invariant it refines. `mdbook serve docs` to preview; CI deploys it to
+  GitHub Pages from `main`.
+- **[Paper draft](paper/axiom.md)** — *"From Formal Specification to Verified
+  Implementation of CRDTs."*
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — the spec-first workflow and the claims
+  discipline.
+
 ## Python
 
 [`crates/axiom-py`](crates/axiom-py) exposes the CRDTs to Python via PyO3 +

@@ -156,3 +156,20 @@ jobs:
           ./.venv/bin/pip install -U pip maturin pytest
           ./.venv/bin/maturin develop
           ./.venv/bin/python -m pytest tests/ -q
+
+  book:
+    name: The Axiom Book (mdbook build)
+    runs-on: ubuntu-latest
+    env:
+      MDBOOK_VERSION: "0.5.3"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install mdBook
+        run: |
+          curl -fLsS -o mdbook.tar.gz \
+            "https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          tar -xzf mdbook.tar.gz
+          echo "$PWD" >> "$GITHUB_PATH"
+      - name: Build the book
+        run: mdbook build docs

@@ -1,0 +1,16 @@
+[book]
+title = "The Axiom Book"
+authors = ["RoSh"]
+description = "CRDTs from scratch, TLA+ from scratch, and the refinement mapping that connects a verified specification to a real Rust implementation."
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/RoSh/axiom"
+edit-url-template = "https://github.com/RoSh/axiom/edit/main/docs/{path}"
+
+[output.html.fold]
+enable = true
+level = 1
