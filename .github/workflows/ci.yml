@@ -173,3 +173,16 @@ jobs:
           echo "$PWD" >> "$GITHUB_PATH"
       - name: Build the book
         run: mdbook build docs
+
+  metrics:
+    name: Metrics drift check (README vs METRICS.md)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check headline metrics are in sync
+        run: python3 scripts/check_metrics.py
