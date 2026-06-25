@@ -68,7 +68,9 @@ jobs:
           jar="$PWD/tla2tools.jar"
           cd tla
           shopt -s nullglob
-          cfgs=(*.cfg)
+          # Top-level specs plus the deterministic trace fixtures under traces/
+          # (which reuse modules in tla/, so we run TLC from here).
+          cfgs=(*.cfg traces/*.cfg)
           if [ ${#cfgs[@]} -eq 0 ]; then
             echo "No .cfg model files yet — nothing to model-check. (Specs land in Phase 1.)"
             exit 0

@@ -8,8 +8,9 @@ mathematical model in **TLA+**, then as production-quality **Rust** — and ties
 the two together with a `tla_state()` *refinement mapping* so the implementation
 can be checked against the verified spec.
 
-> **Status:** early scaffolding. Specs and implementation land phase by phase.
-> See [`CLAUDE.md`](CLAUDE.md) for the build plan and conventions.
+> **Status:** Phase 1 (TLA+ specifications) and Phase 2 (Rust core) complete.
+> Phase 3 (acoustic-auth case study) and Phase 4 (paper, Python bindings, book)
+> are next. See [`CLAUDE.md`](CLAUDE.md) for the build plan and conventions.
 
 ## Why this is unusual
 
@@ -26,6 +27,23 @@ TLA+ specs ──refinement mapping──▶ Rust core ──▶ tests ──▶
                                     vector clock +  TLC trace
                                     causal broadcast) replay)
 ```
+
+## Verification
+
+Axiom is built spec-first and keeps every assurance claim calibrated to *how* it
+was established. Current results:
+
+| Layer | Technique | Result |
+|-------|-----------|--------|
+| TLA+ specs | **model-checked (TLC, bounded)** | Counter, G/PN-Counter, OR-Set, RGA — ~45,000 distinct states across the suite, no violations (bounds in [`tla/README.md`](tla/README.md)) |
+| G-Counter merge | **machine-proved (TLAPS)** | `MergeVec(u,v) = MergeVec(v,u)` for all vectors — all 11 obligations discharged ([`tla/GCounterProofs.tla`](tla/GCounterProofs.tla)) |
+| Rust core | **property-tested (proptest)** | 31 properties at 256–500 cases each (~8,900 generated cases) + 20 concrete unit tests |
+| Spec ↔ code | **trace-validated** | a TLC-pinned G-Counter operation trace, replayed on the Rust impl, reproduces the spec's state ([trace_replay.rs](crates/axiom-core/tests/trace_replay.rs)) |
+
+What is **not** claimed: there is no unbounded *proof* of CRDT convergence — it is
+model-checked within finite bounds and property-tested, not proved; the OR-Set
+and RGA TLC models use small replica/op bounds; and only G-Counter merge
+commutativity carries a TLAPS proof. We prefer understatement.
 
 ## Claims policy
 
