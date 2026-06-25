@@ -36,6 +36,7 @@
 //! an empty library.
 #![forbid(unsafe_code)]
 
+pub mod axiom_verify;
 pub mod causal_broadcast;
 pub mod gcounter;
 pub mod hlc;
@@ -44,6 +45,7 @@ pub mod pncounter;
 pub mod rga;
 pub mod vector_clock;
 
+pub use axiom_verify::join_in_order;
 pub use causal_broadcast::{CausalProcess, Message, Network};
 pub use gcounter::{GCounter, GCounterOp, TlaGCounterState};
 pub use hlc::{Hlc, HlcClock};
