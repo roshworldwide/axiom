@@ -35,3 +35,7 @@
 //! The crate intentionally exports nothing yet; the scaffold compiles clean as
 //! an empty library.
 #![forbid(unsafe_code)]
+
+pub mod vector_clock;
+
+pub use vector_clock::{ReplicaId, VectorClock};
