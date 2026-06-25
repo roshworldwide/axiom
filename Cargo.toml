@@ -7,7 +7,7 @@ members = ["crates/axiom-core"]
 version = "0.0.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/RoSh/axiom"
+repository = "https://github.com/roshworldwide/axiom"
 authors = ["RoSh and the Axiom contributors"]
 
 # Dependency versions are declared centrally and added per phase as needed

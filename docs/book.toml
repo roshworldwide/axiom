@@ -8,8 +8,8 @@ src = "src"
 [output.html]
 default-theme = "rust"
 preferred-dark-theme = "ayu"
-git-repository-url = "https://github.com/RoSh/axiom"
-edit-url-template = "https://github.com/RoSh/axiom/edit/main/docs/{path}"
+git-repository-url = "https://github.com/roshworldwide/axiom"
+edit-url-template = "https://github.com/roshworldwide/axiom/edit/main/docs/{path}"
 
 [output.html.fold]
 enable = true
