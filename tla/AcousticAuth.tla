@@ -4,21 +4,27 @@
 (* single-use, time-bounded, environment-bound challenge tokens; a          *)
 (* co-located prover captures and returns one to be accepted.               *)
 (*                                                                          *)
-(* Week 11 modeled the honest protocol. Week 12 (here) adds an ACTIVE        *)
-(* adversary that can eavesdrop ("capture") any issued token and re-present  *)
-(* it — a replay attack — and verifies the protocol resists it. Every        *)
-(* acceptance, honest or adversarial, funnels through the single Accept(t,v) *)
-(* guard, so the invariants pin down whether the protocol's checks suffice:  *)
-(* drop the single-use check and TLC finds the replay.                       *)
+(* Week 11 modeled the honest protocol; Week 12 added a capture+replay        *)
+(* adversary; Week 13 adds the cross-environment relay adversary. Every       *)
+(* acceptance, honest or adversarial, funnels through the single Accept(t,v)  *)
+(* guard, so the invariants pin down whether the protocol's checks suffice:   *)
+(* drop the single-use check and TLC finds the replay; drop the environment   *)
+(* check and TLC finds the relay.                                            *)
 (*                                                                          *)
 (*   Replay : enable capture + same-environment re-presentation (Week 12).   *)
 (*   Relay  : also enable cross-environment re-presentation     (Week 13).   *)
+(*                                                                          *)
+(* ABSTRACTION: an acoustic environment is modeled as an OPAQUE fingerprint   *)
+(* constant (env[t]); we do not model acoustics or signal physics. The claim  *)
+(* is conditional: IF a token's fingerprint cannot be reproduced in a         *)
+(* different environment, THEN a relayed token is rejected. TLC checks the    *)
+(* protocol logic given that assumption; it does not justify the assumption.  *)
 (***************************************************************************)
 EXTENDS Naturals
 
 CONSTANTS
     Tokens,    \* finite set of token identifiers
-    Envs,      \* finite set of acoustic environments / locations
+    Envs,      \* acoustic environments, each an opaque fingerprint constant
     MaxTime,   \* time bound (keeps the model finite)
     TTL,       \* token lifetime: a token is fresh for < TTL ticks
     Replay,    \* BOOLEAN: enable the capture + replay adversary?

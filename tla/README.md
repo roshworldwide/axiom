@@ -18,7 +18,7 @@ This directory holds the formal models that the Rust implementation refines.
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | ✅ model-checked (TLC) |
 | `RGA.tla` | 1 · Wk 4 | replicated growable array | ✅ model-checked (TLC) |
-| `AcousticAuth.tla` | 3 · Wk 11–12 | acoustic auth protocol | ✅ model-checked (TLC, replay attacker) |
+| `AcousticAuth.tla` | 3 · Wk 11–13 | acoustic auth protocol | ✅ model-checked (TLC, replay + relay attacker) |
 
 Helper / proof modules (no `.cfg`, so not directly model-checked):
 `GCounterBase.tla` (shared merge math), `GCounterProofs.tla` (TLAPS proof).
@@ -61,6 +61,22 @@ succeeds *within these finite bounds*, not a proof for all parameters. That the
 single-use check is load-bearing was confirmed by removing the `accepts[t] = 0`
 conjunct — TLC then finds a short trace accepting a token twice.
 
+**Relay impossibility (Week 13).** An acoustic environment is modeled as an
+opaque *fingerprint* constant `env[t]`; `Accept` requires the verifier's
+environment to equal the token's. So a token captured in environment A and
+relayed to a verifier in environment B is rejected. TLC confirms
+`RelayResistance` (`acceptedIn[t] ⊆ {env[t]}`) holds with both adversaries
+enabled — a relayed token is never accepted in a foreign environment. Removing
+the `env[t] = v` conjunct makes TLC find a relay that succeeds, confirming the
+check is load-bearing.
+
+**Honest abstraction.** This is a result about the protocol's *logic*, not about
+acoustics. We assume a token's fingerprint cannot be reproduced in a different
+environment (modeled by distinct opaque constants); TLC verifies the protocol
+rejects mismatches *given that assumption*. It does **not** justify the
+assumption — that an acoustic fingerprint is genuinely environment-bound is a
+physical claim outside the model.
+
 ## Claims policy (read before writing any result down)
 
 When recording what a spec establishes, use precise language:
@@ -83,7 +99,7 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | `ORSet.tla` | 3 replicas, 2 elements, `MaxAdds = 1`, `SYMMETRY` | 7,239 distinct (115,296 generated), depth 14, no error |
 | `RGA.tla` | **2 replicas, no symmetry**, `MaxInserts = 2` | 35,441 distinct (278,273 generated), depth 13, no error |
 | `AcousticAuth.tla` (honest) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, no attacker | 4,109 distinct (8,350 generated), depth 11, no error |
-| `AcousticAuth.tla` (replay attacker) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `Replay = TRUE` | 15,957 distinct (65,014 generated), depth 13, no error |
+| `AcousticAuth.tla` (replay + relay) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `Replay = Relay = TRUE` | 15,957 distinct (65,014 generated), depth 13, no error |
 
 `RGA.tla` deliberately does **not** use symmetry: its tie-break is a total order
 on ids (hence on replica identifiers), which makes replicas distinguishable, so
