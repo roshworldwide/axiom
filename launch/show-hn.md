@@ -34,4 +34,5 @@ as a lightweight way to keep a verified spec and real code from drifting apart,
 and (2) where the line should sit between honest reporting and overclaiming in
 "verified" software.
 
-Repo: <link> · The Axiom Book: <pages-link> · Paper draft: `paper/axiom.md`
+Repo: https://github.com/roshworldwide/axiom · The Axiom Book:
+https://roshworldwide.github.io/axiom · Paper draft: `paper/axiom.md`
