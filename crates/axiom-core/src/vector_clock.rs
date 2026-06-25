@@ -66,6 +66,11 @@ impl VectorClock {
         self.partial_cmp(other).is_none()
     }
 
+    /// Iterate the non-zero `(replica, count)` entries.
+    pub fn iter(&self) -> impl Iterator<Item = (ReplicaId, u64)> + '_ {
+        self.entries.iter().map(|(&r, &c)| (r, c))
+    }
+
     /// Number of replicas this clock has a (non-zero) entry for.
     pub fn len(&self) -> usize {
         self.entries.len()

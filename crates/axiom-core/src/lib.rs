@@ -36,6 +36,7 @@
 //! an empty library.
 #![forbid(unsafe_code)]
 
+pub mod causal_broadcast;
 pub mod gcounter;
 pub mod hlc;
 pub mod orset;
@@ -43,6 +44,7 @@ pub mod pncounter;
 pub mod rga;
 pub mod vector_clock;
 
+pub use causal_broadcast::{CausalProcess, Message, Network};
 pub use gcounter::{GCounter, GCounterOp, TlaGCounterState};
 pub use hlc::{Hlc, HlcClock};
 pub use orset::{ORSet, ORSetOp, TlaORSetState};
