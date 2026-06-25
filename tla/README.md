@@ -18,7 +18,7 @@ This directory holds the formal models that the Rust implementation refines.
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | ✅ model-checked (TLC) |
 | `RGA.tla` | 1 · Wk 4 | replicated growable array | ✅ model-checked (TLC) |
-| `AcousticAuth.tla` | 3 | acoustic auth protocol | _pending_ |
+| `AcousticAuth.tla` | 3 · Wk 11 | acoustic auth protocol | ✅ model-checked (TLC, honest model) |
 
 Helper / proof modules (no `.cfg`, so not directly model-checked):
 `GCounterBase.tla` (shared merge math), `GCounterProofs.tla` (TLAPS proof).
@@ -65,6 +65,7 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | `PNCounter.tla` | 3 replicas, `MaxOps = 1`, `SYMMETRY` | 2,020 distinct (20,893 generated), depth 13, no error |
 | `ORSet.tla` | 3 replicas, 2 elements, `MaxAdds = 1`, `SYMMETRY` | 7,239 distinct (115,296 generated), depth 14, no error |
 | `RGA.tla` | **2 replicas, no symmetry**, `MaxInserts = 2` | 35,441 distinct (278,273 generated), depth 13, no error |
+| `AcousticAuth.tla` (honest) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `Attacker = FALSE` | 4,109 distinct (8,350 generated), depth 11, no error |
 
 `RGA.tla` deliberately does **not** use symmetry: its tie-break is a total order
 on ids (hence on replica identifiers), which makes replicas distinguishable, so
