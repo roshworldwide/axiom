@@ -34,13 +34,13 @@ jobs:
           tar -xzf mdbook.tar.gz
           echo "$PWD" >> "$GITHUB_PATH"
 
+      # ONE-TIME SETUP: enable Pages at Settings -> Pages -> Build and deployment
+      # -> Source = "GitHub Actions". The default GITHUB_TOKEN cannot enable it
+      # via the API, so this deploy fails until that toggle is set; afterward it
+      # publishes the book on every push to main.
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-        with:
-          # Auto-enable Pages (with the GitHub Actions source) on first run, so
-          # the deploy works without a manual Settings change.
-          enablement: true
 
       - name: Build the book
         run: mdbook build docs
