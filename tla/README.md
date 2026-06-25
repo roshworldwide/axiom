@@ -18,7 +18,7 @@ This directory holds the formal models that the Rust implementation refines.
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | ✅ model-checked (TLC) |
 | `RGA.tla` | 1 · Wk 4 | replicated growable array | ✅ model-checked (TLC) |
-| `AcousticAuth.tla` | 3 · Wk 11 | acoustic auth protocol | ✅ model-checked (TLC, honest model) |
+| `AcousticAuth.tla` | 3 · Wk 11–12 | acoustic auth protocol | ✅ model-checked (TLC, replay attacker) |
 
 Helper / proof modules (no `.cfg`, so not directly model-checked):
 `GCounterBase.tla` (shared merge math), `GCounterProofs.tla` (TLAPS proof).
@@ -44,6 +44,23 @@ exists — it was verified by running the Linux `tlapm` under `linux/amd64`
 emulation in Docker; `tlapm GCounterProofs.tla` reports *"All 11 obligations
 proved."*
 
+## Acoustic Auth (security case study)
+
+Phase 3 applies the same methodology to a security protocol
+(`AcousticAuth.tla`). Every acceptance — honest or adversarial — passes through
+one `Accept(t, v)` guard, so a single invariant pins down each defense.
+
+**Replay resistance (Week 12).** The adversary may *capture* the value of any
+issued token and re-present it any number of times, in any order, interleaved
+with honest requests and verifications — the model explores that entire space.
+`Accept` admits a token only when `accepts[t] = 0` (single use), so a captured,
+already-accepted token is rejected. TLC verifies `ReplayResistance`
+(`accepts[t] <= 1`) holds across all **15,957 reachable states** (2 tokens,
+2 envs, `MaxTime = 4`, `TTL = 2`). This is **bounded**: it shows no replay
+succeeds *within these finite bounds*, not a proof for all parameters. That the
+single-use check is load-bearing was confirmed by removing the `accepts[t] = 0`
+conjunct — TLC then finds a short trace accepting a token twice.
+
 ## Claims policy (read before writing any result down)
 
 When recording what a spec establishes, use precise language:
@@ -65,7 +82,8 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | `PNCounter.tla` | 3 replicas, `MaxOps = 1`, `SYMMETRY` | 2,020 distinct (20,893 generated), depth 13, no error |
 | `ORSet.tla` | 3 replicas, 2 elements, `MaxAdds = 1`, `SYMMETRY` | 7,239 distinct (115,296 generated), depth 14, no error |
 | `RGA.tla` | **2 replicas, no symmetry**, `MaxInserts = 2` | 35,441 distinct (278,273 generated), depth 13, no error |
-| `AcousticAuth.tla` (honest) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `Attacker = FALSE` | 4,109 distinct (8,350 generated), depth 11, no error |
+| `AcousticAuth.tla` (honest) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, no attacker | 4,109 distinct (8,350 generated), depth 11, no error |
+| `AcousticAuth.tla` (replay attacker) | 2 tokens, 2 envs, `MaxTime = 4`, `TTL = 2`, `Replay = TRUE` | 15,957 distinct (65,014 generated), depth 13, no error |
 
 `RGA.tla` deliberately does **not** use symmetry: its tie-break is a total order
 on ids (hence on replica identifiers), which makes replicas distinguishable, so
