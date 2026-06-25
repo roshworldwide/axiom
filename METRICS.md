@@ -1,0 +1,113 @@
+# METRICS — canonical source of truth
+
+Every figure Axiom quotes (README, paper, book, launch copy) is derived from
+source by the command/file cited here. **Regenerate with these commands before
+changing a number anywhere.** Each figure carries its claim-class per the
+[claims policy](CLAUDE.md#claims-policy-read-this-before-writing-any-result-down):
+*model-checked (TLC, bounded)*, *machine-proved (TLAPS, unbounded)*,
+*property-tested (proptest)*, *trace-validated*. A CI check
+(`scripts/check_metrics.py`) fails if the README headline numbers drift from the
+block at the bottom of this file.
+
+## TLA+ modules
+
+`ls tla/*.tla tla/traces/*.tla` → **10 modules**, classified:
+
+| Module | Role | Has `.cfg`? |
+|--------|------|-------------|
+| `Counter.tla` | model-checked spec (warm-up) | yes |
+| `GCounter.tla` | model-checked spec (CRDT) | yes |
+| `PNCounter.tla` | model-checked spec (CRDT) | yes |
+| `ORSet.tla` | model-checked spec (CRDT) | yes |
+| `RGA.tla` | model-checked spec (CRDT) | yes |
+| `AcousticAuth.tla` | model-checked spec (protocol) | yes |
+| `GCounterTrace.tla` | trace scenario (model-checked via `TraceMatches`) | yes (`traces/`) |
+| `GCounterProofs.tla` | TLAPS proof | no |
+| `AcousticAuthProofs.tla` | TLAPS proof | no |
+| `GCounterBase.tla` | shared helper (merge math) | no |
+
+- **6 model-checked spec modules** (each has a `.cfg`): Counter, GCounter,
+  PNCounter, ORSet, RGA, AcousticAuth.
+- **4 CRDTs**: G-Counter, PN-Counter, OR-Set, RGA. (`Counter` is a warm-up;
+  `AcousticAuth` is a protocol, not a CRDT.)
+- **2 TLAPS proof modules**; **1 shared helper**; **1 trace scenario**.
+
+## Model-checked (TLC, bounded) — distinct states
+
+Command (per spec, from `tla/`):
+`java -cp tla2tools.jar tlc2.TLC -workers auto -config <X>.cfg <X>.tla`
+(tla2tools **v1.7.4**). Each run reports "No error has been found."
+
+| Spec | Distinct states |
+|------|----------------:|
+| `Counter` | 6 |
+| `GCounter` | 480 |
+| `PNCounter` | 2,020 |
+| `ORSet` | 7,239 |
+| `RGA` | 35,441 |
+| `AcousticAuth` | 16,853 |
+| **Total across the 6 spec models** | **62,039** |
+| `GCounterTrace` scenario | 8 |
+| **Total TLC states (incl. scenario)** | **62,047** |
+
+## Machine-proved (TLAPS, unbounded) — obligations
+
+Command: `tlapm tla/<M>Proofs.tla` (Linux x86_64; locally via `linux/amd64`
+Docker — there is no arm64 `tlapm`). Tool: tlapm **1.6.0-pre**, Z3 backend.
+
+| Theorem | Module | Obligations |
+|---------|--------|------------:|
+| G-Counter merge commutativity | `GCounterProofs.tla` | 11 |
+| Freshness under bounded clock skew | `AcousticAuthProofs.tla` | 3 |
+| **Total** | **2 proofs** | **14** |
+
+## Property-tested (proptest)
+
+Command: `cargo test --workspace` (rustc stable; `-D warnings`).
+
+- **51 test functions**, all passing: 50 in the `axiom-core` lib unit tests +
+  1 integration test (`tests/trace_replay.rs`). (`cargo test` output.)
+- Of the 51: **31 are proptest properties**; **20 are concrete unit/integration
+  tests**. (Count of `#[test]` inside `proptest! { }` blocks vs outside.)
+- proptest **cases**: 27 properties at the default 256 cases + 4 properties at
+  500 cases (`axiom_verify.rs`, `ProptestConfig::with_cases(500)`):
+  `27 × 256 + 4 × 500 = 6,912 + 2,000 = 8,912` **generated cases**.
+- Python: **7 pytest** smoke tests (`cd crates/axiom-py && pytest`), separate
+  from `cargo test`.
+
+## Trace-validated
+
+- **G-Counter only.** `crates/axiom-core/tests/trace_replay.rs` replays the ops
+  from `tla/traces/GCounterTrace.tla` (whose `Expected` final state is pinned by
+  TLC via the `TraceMatches` invariant) and matches `tla_state()`.
+- _(PART B extends this to OR-Set and RGA, or scopes the claim honestly.)_
+
+## Code size
+
+- `axiom-core`: **2,002 lines** of Rust — 1,927 (`src/`, includes inline
+  `#[cfg(test)]` tests) + 75 (`tests/`).
+  `find crates/axiom-core/{src,tests} -name '*.rs' | xargs wc -l`
+- `axiom-py`: **251 lines** (`wc -l crates/axiom-py/src/lib.rs`).
+- TLA+: **740 lines** (`cat tla/*.tla tla/traces/*.tla | wc -l`).
+
+## Docs & CI
+
+- mdBook chapters: **11** (`ls docs/src/*.md` minus `SUMMARY.md`).
+- CI jobs: **5** in `ci.yml` (rust, tlc, tlaps, python, book) + **2** in
+  `pages.yml` (build, deploy).
+
+---
+
+The README must contain each line below verbatim; `scripts/check_metrics.py`
+enforces it so the headline numbers can't silently diverge.
+
+<!-- HEADLINE-START -->
+- 62,039 distinct states
+- 6 model-checked specs
+- 4 CRDTs
+- 2 TLAPS proofs
+- 14 obligations
+- 51 test functions
+- 31 property tests
+- 8,912 generated cases
+<!-- HEADLINE-END -->

@@ -16,7 +16,7 @@ abstract: |
   artifact (4 CRDTs, a causal-broadcast layer, ~2k lines of Rust, ~740 lines of
   TLA+) and an acoustic-authentication case study showing the method extends from
   data structures to a security protocol. Throughout we are deliberate about the
-  *strength* of each claim: ~62,000 model-checked states are bounded evidence,
+  *strength* of each claim: 62,039 model-checked states are bounded evidence,
   not proof; only two narrow lemmas are proved unbounded. Axiom's contribution is
   less a new algorithm than a reproducible discipline for keeping a verified spec
   and a real implementation honestly connected.
@@ -151,7 +151,7 @@ violations:
 | `ORSet` | 3 replicas, 2 elements, `MaxAdds=1`, symmetry | 7,239 | 14 |
 | `RGA` | 2 replicas, `MaxInserts=2` (no symmetry) | 35,441 | 13 |
 | `AcousticAuth` | 2 tokens, 2 envs, `MaxTime=4`, `TTL=2`, `MaxSkew=1`, full attacker | 16,853 | 13 |
-| **Total** | | **≈ 62,000** | |
+| **Total** | | **62,039** | |
 
 **Deductive proof (TLAPS, unbounded).** Two lemmas, machine-checked by `tlapm`
 1.6.0-pre with the Z3 backend:
@@ -162,7 +162,7 @@ violations:
 | Freshness under bounded clock skew | `AcousticAuthProofs.tla` | 3 |
 
 **Property testing (proptest).** 31 property tests at 256–500 cases each
-(≈ 8,900 generated cases), plus 20 concrete unit/integration tests — 51 test
+(8,912 generated cases), plus 20 concrete unit/integration tests — 51 test
 functions total, all passing under `-D warnings`. Properties include partial-
 order laws of the vector clock, the four CRDTs' convergence/commutativity/
 idempotence, op-based convergence under arbitrary network reordering through

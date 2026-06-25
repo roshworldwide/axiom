@@ -8,9 +8,9 @@ The discipline behind this chapter is simple: every assurance term means exactly
 
 | Level | What it means | What Axiom has |
 |-------|---------------|----------------|
-| **model-checked (TLC, bounded)** | Exhaustive state exploration up to stated finite bounds — every reachable state checked, no violation found | All five CRDT specs plus the acoustic-auth model: ~62,000 distinct states across the suite |
+| **model-checked (TLC, bounded)** | Exhaustive state exploration up to stated finite bounds — every reachable state checked, no violation found | All five CRDT specs plus the acoustic-auth model: 62,039 distinct states across the suite |
 | **machine-proved (TLAPS)** | A deductive, *unbounded* proof — holds for all inputs, no finite bound | Two narrow lemmas, 14 proof obligations total |
-| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, ~8,900 generated cases (plus 51 test functions overall) |
+| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 8,912 generated cases (plus 51 test functions overall) |
 | **trace-validated** | A TLC-pinned execution trace replayed on the Rust impl, matching the spec's state | The G-Counter |
 
 ### Model-checked (TLC, bounded)
@@ -26,7 +26,7 @@ TLC walks the entire reachable state space within finite bounds and reports any 
 | `RGA.tla` | 35,441 |
 | `AcousticAuth.tla` (attacker + skew) | 16,853 |
 
-That is roughly 62,000 distinct states, every one explored, no violation found — within the stated bounds. Toolchain: `tla2tools` v1.7.4.
+That is 62,039 distinct states, every one explored, no violation found — within the stated bounds. Toolchain: `tla2tools` v1.7.4.
 
 ### Machine-proved (TLAPS)
 
@@ -39,7 +39,7 @@ Fourteen obligations, both checked by `tlapm` 1.6.0-pre with the Z3 backend. Bec
 
 ### Property-tested (proptest)
 
-The Rust core in `crates/axiom-core` is exercised by 31 property tests over ~8,900 randomly generated cases — commutativity, associativity, idempotence, convergence on random op interleavings. Randomized testing finds bugs; it does not prove their absence.
+The Rust core in `crates/axiom-core` is exercised by 31 property tests over 8,912 randomly generated cases — commutativity, associativity, idempotence, convergence on random op interleavings. Randomized testing finds bugs; it does not prove their absence.
 
 ### Trace-validated
 

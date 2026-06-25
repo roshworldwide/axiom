@@ -9,12 +9,12 @@ by TLC, replayed on the Rust implementation and checked to match.
 
 The thing I cared most about is **not overclaiming**. So, precisely:
 
-- **model-checked (TLC, bounded):** ~62,000 distinct states across 6 specs, no
+- **model-checked (TLC, bounded):** 62,039 distinct states across 6 specs, no
   invariant violations. This is exhaustive *up to finite bounds*, not a proof.
 - **machine-proved (TLAPS, unbounded):** exactly two narrow lemmas — G-Counter
   merge commutativity (11 obligations) and acoustic-auth freshness (3) — not
   whole data types.
-- **property-tested:** 31 properties, ~8,900 generated cases.
+- **property-tested:** 31 properties, 8,912 generated cases.
 - **trace-validated:** the G-Counter, so far.
 
 There's also a security case study — an acoustic-authentication protocol — showing
