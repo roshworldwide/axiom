@@ -1,0 +1,20 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "axiom"
+description = "Formally specified CRDTs for Python (bindings over the Rust axiom-core)."
+requires-python = ">=3.9"
+license = { text = "MIT OR Apache-2.0" }
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = ["version"]
+
+[tool.maturin]
+module-name = "axiom"
+# Enable the extension-module feature only for the maturin build (not for plain
+# cargo check/clippy on the crate).
+features = ["pyo3/extension-module"]
