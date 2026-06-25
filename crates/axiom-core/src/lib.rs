@@ -36,6 +36,10 @@
 //! an empty library.
 #![forbid(unsafe_code)]
 
+pub mod gcounter;
+pub mod pncounter;
 pub mod vector_clock;
 
+pub use gcounter::{GCounter, GCounterOp, TlaGCounterState};
+pub use pncounter::{PNCounter, PNCounterOp, TlaPNCounterState};
 pub use vector_clock::{ReplicaId, VectorClock};
