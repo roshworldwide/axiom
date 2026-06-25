@@ -60,7 +60,11 @@ jobs:
         run: |
           curl -fLsS -o tla2tools.jar \
             "https://github.com/tlaplus/tlaplus/releases/download/${TLA2TOOLS_VERSION}/tla2tools.jar"
-          java -cp tla2tools.jar tlc2.TLC -help >/dev/null && echo "tla2tools OK"
+          # curl -f already fails on HTTP errors; just confirm the jar is
+          # non-empty. (Do NOT smoke-test with `tlc2.TLC -help` — it exits
+          # non-zero by design, which trips `bash -e`. The real TLC runs below
+          # validate the jar.)
+          test -s tla2tools.jar && echo "tla2tools.jar: $(wc -c < tla2tools.jar) bytes"
 
       - name: Run TLC on every spec that has a .cfg model
         run: |
