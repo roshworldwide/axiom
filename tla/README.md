@@ -14,11 +14,35 @@ This directory holds the formal models that the Rust implementation refines.
 | Spec | Phase | What it models | Status |
 |------|-------|----------------|--------|
 | `Counter.tla` | 1 · Wk 1 | toolchain warm-up | ✅ model-checked (TLC) |
-| `GCounter.tla` | 1 · Wk 2 | grow-only counter | _pending_ |
-| `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | _pending_ |
+| `GCounter.tla` | 1 · Wk 2 | grow-only counter | ✅ model-checked (TLC) · ✅ machine-proved (TLAPS) |
+| `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | ✅ model-checked (TLC) |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | _pending_ |
 | `RGA.tla` | 1 · Wk 4 | replicated growable array | _pending_ |
 | `AcousticAuth.tla` | 3 | acoustic auth protocol | _pending_ |
+
+Helper / proof modules (no `.cfg`, so not directly model-checked):
+`GCounterBase.tla` (shared merge math), `GCounterProofs.tla` (TLAPS proof).
+
+## Machine-checked proofs (TLAPS)
+
+Beyond bounded model checking, results proved deductively hold for **all**
+inputs (no finite bound):
+
+| Theorem | Module | Tool | Result |
+|---------|--------|------|--------|
+| G-Counter merge is commutative — `MergeVec(u, v) = MergeVec(v, u)` for all `u, v ∈ [Replicas → Nat]` | `GCounterProofs.tla` | `tlapm` 1.6.0-pre (Z3 4.8.9) | ✅ **all 11 obligations proved** |
+
+The merge operator (`MergeVec`) is defined once in `GCounterBase.tla`, which
+both `GCounter.tla` (model checking) and `GCounterProofs.tla` (the proof) extend
+— so the theorem is about the *exact* operator TLC checks, not a copy of it.
+(`RECURSIVE` and the `TLC` module are kept out of the base/proof modules because
+`tlapm` cannot elaborate them.)
+
+**How it's verified.** The `tlaps` CI job runs `tlapm` on every `*Proofs.tla`
+(Linux x86_64, native). Locally on Apple Silicon — where no arm64 `tlapm` build
+exists — it was verified by running the Linux `tlapm` under `linux/amd64`
+emulation in Docker; `tlapm GCounterProofs.tla` reports *"All 11 obligations
+proved."*
 
 ## Claims policy (read before writing any result down)
 
@@ -37,3 +61,5 @@ bounds, or abstract the data — and document the chosen bounds here per spec.
 | Spec | Model bounds | TLC result |
 |------|--------------|------------|
 | `Counter.tla` | `CONSTRAINT counter <= 5` | 6 distinct states (13 generated), depth 6, no error |
+| `GCounter.tla` | 3 replicas, `MaxIncrements = 2`, `SYMMETRY` | 480 distinct (4,849 generated), depth 13, no error |
+| `PNCounter.tla` | 3 replicas, `MaxOps = 1`, `SYMMETRY` | 2,020 distinct (20,893 generated), depth 13, no error |

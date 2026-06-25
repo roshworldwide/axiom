@@ -86,3 +86,45 @@ jobs:
             echo "::endgroup::"
           done
           exit $status
+
+  tlaps:
+    name: TLA+ proofs (TLAPS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install TLAPS (tlapm 1.6.0-pre, Linux x86_64)
+        run: |
+          curl -fLsS -o tlapm.tar.gz \
+            https://github.com/tlaplus/tlapm/releases/download/1.6.0-pre/tlapm-1.6.0-pre-x86_64-linux-gnu.tar.gz
+          mkdir -p tlaps-bin && tar -xzf tlapm.tar.gz -C tlaps-bin
+          TLAPM="$(find "$PWD/tlaps-bin" -name tlapm -type f | head -1)"
+          echo "TLAPM=$TLAPM" >> "$GITHUB_ENV"
+          "$TLAPM" --version
+
+      - name: Check proofs on every tla/*Proofs.tla
+        run: |
+          cd tla
+          shopt -s nullglob
+          proofs=(*Proofs.tla)
+          if [ ${#proofs[@]} -eq 0 ]; then
+            echo "No *Proofs.tla yet — nothing to prove. (Proofs land from Week 2.)"
+            exit 0
+          fi
+          status=0
+          for p in "${proofs[@]}"; do
+            echo "::group::tlapm $p"
+            # tlapm exits non-zero if an obligation is unproved; we ALSO require
+            # the explicit "All N obligations proved." line as a belt-and-braces
+            # check (its exit-code semantics are less crisp than TLC's).
+            "$TLAPM" "$p" 2>&1 | tee "tlapm-${p%.tla}.out"
+            pstat=${PIPESTATUS[0]}
+            if [ "$pstat" -ne 0 ] || ! grep -Eq 'All [0-9]+ obligations proved' "tlapm-${p%.tla}.out"; then
+              echo "::error::TLAPS did not prove all obligations in $p"
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $status
