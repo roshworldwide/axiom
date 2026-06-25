@@ -13,7 +13,7 @@ This directory holds the formal models that the Rust implementation refines.
 
 | Spec | Phase | What it models | Status |
 |------|-------|----------------|--------|
-| `Counter.tla` | 1 · Wk 1 | toolchain warm-up | _pending_ |
+| `Counter.tla` | 1 · Wk 1 | toolchain warm-up | ✅ model-checked (TLC) |
 | `GCounter.tla` | 1 · Wk 2 | grow-only counter | _pending_ |
 | `PNCounter.tla` | 1 · Wk 2 | inc/dec counter | _pending_ |
 | `ORSet.tla` | 1 · Wk 3 | observed-remove set | _pending_ |
@@ -34,4 +34,6 @@ When recording what a spec establishes, use precise language:
 When TLC's state space explodes, we apply symmetry reduction, tighten operation
 bounds, or abstract the data — and document the chosen bounds here per spec.
 
-_(Bounds tables are filled in as specs land.)_
+| Spec | Model bounds | TLC result |
+|------|--------------|------------|
+| `Counter.tla` | `CONSTRAINT counter <= 5` | 6 distinct states (13 generated), depth 6, no error |
