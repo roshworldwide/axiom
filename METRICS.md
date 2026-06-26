@@ -150,6 +150,8 @@ The README must contain each line below verbatim; `scripts/check_metrics.py`
 enforces it so the headline numbers can't silently diverge.
 
 <!-- HEADLINE-START -->
+- 142,934,260 distinct states in a single exhaustive TLC run
+- 211,038,837 cumulative distinct states across the large-scale suite
 - 62,039 distinct states
 - 6 model-checked specs
 - 4 CRDTs

@@ -41,7 +41,7 @@ The chapters ahead walk through Axiom from the ground up: a short primer on CRDT
 
 One rule shapes everything in this book: **never overstate what was established, and be precise about *how*.** These four terms are kept strictly distinct and are never used interchangeably:
 
-- **model-checked (TLC, bounded)** — exhaustive state exploration up to finite bounds. Across the suite that is 62,039 distinct states (Counter 6, GCounter 480, PNCounter 2,020, ORSet 7,239, RGA 35,441, AcousticAuth 16,853).
+- **model-checked (TLC, bounded)** — exhaustive state exploration up to finite bounds. On every commit that is 62,039 distinct states (Counter 6, GCounter 480, PNCounter 2,020, ORSet 7,239, RGA 35,441, AcousticAuth 16,853); a documented large-scale run reaches 142,934,260 distinct states in a single exhaustive TLC run (G-Counter) and 211,038,837 cumulative — a coverage proxy, not proof strength (`evaluation/large_run.md`).
 - **machine-proved (TLAPS)** — a deductive, *unbounded* proof. Exactly two results have this: G-Counter merge commutativity (11 obligations, `tla/GCounterProofs.tla`) and acoustic-auth freshness arithmetic (3 obligations).
 - **property-tested (proptest)** — randomized testing: 31 property tests, 62,000 generated cases on the full nightly run (per-commit CI runs a faster 7,936-case subset).
 - **trace-validated** — a TLC-pinned trace replayed on the Rust impl, matching the spec's state.

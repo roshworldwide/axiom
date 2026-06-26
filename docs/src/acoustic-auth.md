@@ -33,7 +33,7 @@ ReplayResistance == \A t \in Tokens : accepts[t] <= 1
 
 A captured, already-accepted token is rejected.
 
-**Relay impossibility.** An environment is an opaque fingerprint constant `env[t]`. The `env[t] = v` conjunct requires the verifier's environment to equal the token's, so a token captured in environment A and relayed to B is rejected:
+**Relay resistance.** An environment is an opaque fingerprint constant `env[t]`. The `env[t] = v` conjunct requires the verifier's environment to equal the token's, so a token captured in environment A and relayed to B is rejected — model-checked (TLC, bounded), not TLAPS-proved:
 
 ```tla
 RelayResistance == \A t \in Tokens : acceptedIn[t] \subseteq {env[t]}

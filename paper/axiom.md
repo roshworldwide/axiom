@@ -153,6 +153,21 @@ violations:
 | `AcousticAuth` | 2 tokens, 2 envs, `MaxTime=4`, `TTL=2`, `MaxSkew=1`, full attacker | 16,853 | 13 |
 | **Total** | | **62,039** | |
 
+**Large-scale exploration (coverage proxy).** The table above is the bounded
+subset re-checked on every commit. A separate documented run widens the bounds:
+the G-Counter alone reaches **142,934,260 distinct states** in a single
+exhaustive TLC run (3 replicas, `MaxIncrements=13`), and the sweep totals
+**211,038,837 distinct states** (≈ 1.4 × 10⁸ for the single model, 2.1 × 10⁸
+cumulative) across G-Counter, PN-Counter, and OR-Set on an Apple M3 / 16 GiB
+(TLC 2.19; raw output in `evaluation/large_run.md`). This is still
+**model-checked (TLC, bounded)** — larger bounds, not a different kind of
+result. We stress that a large state count is a *coverage proxy, not proof
+strength*: it broadens the search for counterexamples but does not upgrade
+"model-checked" to "proved." The actual guarantees come from the checked
+invariants (and the `Monotonic` step property), the two TLAPS lemmas below, and
+the refinement-mapping / trace-replay link to the Rust code — not from the size
+of the explored state space.
+
 **Deductive proof (TLAPS, unbounded).** Two lemmas, machine-checked by `tlapm`
 1.6.0-pre with the Z3 backend:
 
@@ -192,9 +207,10 @@ through one `Accept(t, v, c)` guard, so a single invariant pins each defense:
 - **Replay resistance.** An adversary may capture any issued token and re-present
   it arbitrarily; `Accept`'s single-use check (`accepts[t]=0`) rejects an already-
   accepted token. TLC verifies `accepts[t] ≤ 1` across 15,957 states.
-- **Relay impossibility.** Modeling an environment as an opaque fingerprint
-  constant, `Accept` requires the verifier's environment to match the token's; a
-  token captured in environment A is never accepted in B.
+- **Relay resistance.** Modeling an environment as an opaque fingerprint
+  constant, `Accept` requires the verifier's environment to match the token's;
+  TLC verifies (bounded) that a token captured in environment A is never
+  accepted in B. This is model-checked, not TLAPS-proved.
 - **Freshness under skew.** A verifier's clock may run up to `MaxSkew` behind real
   time; despite this, an accepted token's real age is `< TTL + MaxSkew`. TLC
   checks this on 16,853 states; the underlying arithmetic is TLAPS-proved for all

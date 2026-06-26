@@ -28,6 +28,8 @@ TLC walks the entire reachable state space within finite bounds and reports any 
 
 That is 62,039 distinct states, every one explored, no violation found — within the stated bounds. Toolchain: `tla2tools` v1.7.4.
 
+That 62,039 is the bounded subset re-checked on **every commit**. A separate documented large-scale run goes much wider: the G-Counter alone reaches **142,934,260 distinct states** in a single exhaustive TLC run (3 replicas, `MaxIncrements=13`), and the sweep totals **211,038,837 distinct states** (≈ 1.4 × 10⁸ single-model, 2.1 × 10⁸ cumulative) across G-Counter, PN-Counter, and OR-Set. It is still **model-checked (TLC, bounded)** — larger bounds, not a different kind of result. A bigger state count is a **coverage proxy, not proof strength**: it widens the hunt for counterexamples but does not turn "model-checked" into "proved." The real guarantees come from the checked invariants, the two TLAPS lemmas, and the trace-replay link — not the state-space size. (Raw TLC output and machine specs: `evaluation/large_run.md`; it runs nightly / on demand, never per-commit.)
+
 ### Machine-proved (TLAPS)
 
 Exactly two results are deductive, unbounded proofs — and no more:
