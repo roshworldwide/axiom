@@ -43,7 +43,7 @@ One rule shapes everything in this book: **never overstate what was established,
 
 - **model-checked (TLC, bounded)** — exhaustive state exploration up to finite bounds. Across the suite that is 62,039 distinct states (Counter 6, GCounter 480, PNCounter 2,020, ORSet 7,239, RGA 35,441, AcousticAuth 16,853).
 - **machine-proved (TLAPS)** — a deductive, *unbounded* proof. Exactly two results have this: G-Counter merge commutativity (11 obligations, `tla/GCounterProofs.tla`) and acoustic-auth freshness arithmetic (3 obligations).
-- **property-tested (proptest)** — randomized testing: 31 property tests, 8,912 generated cases.
+- **property-tested (proptest)** — randomized testing: 31 property tests, 62,000 generated cases on the full nightly run (per-commit CI runs a faster 7,936-case subset).
 - **trace-validated** — a TLC-pinned trace replayed on the Rust impl, matching the spec's state.
 
 We never write "proven" or "proved" for a TLC or proptest result; those are reserved for the two TLAPS proofs above. There is no unbounded proof of full CRDT convergence — convergence is model-checked within finite bounds and property-tested, not proved. Throughout, we prefer understatement. A smaller honest claim is worth more than a big one you cannot back up — and that is the whole point of Axiom.

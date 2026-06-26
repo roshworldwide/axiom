@@ -6,7 +6,7 @@ exists to put a real, reproducible number behind the claim that Axiom's specs
 have been explored at scale.
 
 Reproduce with [`evaluation/large_run.sh`](large_run.sh) (or the manual /
-nightly [`large-tlc.yml`](../.github/workflows/large-tlc.yml) workflow). The
+nightly [`nightly.yml`](../.github/workflows/nightly.yml) workflow). The
 widened models live in [`evaluation/configs/`](configs/).
 
 ## Environment

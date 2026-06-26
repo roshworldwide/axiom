@@ -10,7 +10,7 @@ The discipline behind this chapter is simple: every assurance term means exactly
 |-------|---------------|----------------|
 | **model-checked (TLC, bounded)** | Exhaustive state exploration up to stated finite bounds — every reachable state checked, no violation found | All six model-checked specs (the warm-up Counter, the four CRDTs, and the acoustic-auth model): 62,039 distinct states across the suite |
 | **machine-proved (TLAPS)** | A deductive, *unbounded* proof — holds for all inputs, no finite bound | Two narrow lemmas, 14 proof obligations total |
-| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 8,912 generated cases (plus 55 test functions overall) |
+| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 62,000 generated cases on the full nightly run (per-commit CI runs a 7,936-case subset) — plus 55 test functions overall |
 | **trace-validated** | A TLC-pinned execution trace replayed on the Rust impl, matching the spec's state | G-Counter, OR-Set, RGA |
 
 ### Model-checked (TLC, bounded)
@@ -39,7 +39,7 @@ Fourteen obligations, both checked by `tlapm` 1.6.0-pre with the Z3 backend. Bec
 
 ### Property-tested (proptest)
 
-The Rust core in `crates/axiom-core` is exercised by 31 property tests over 8,912 randomly generated cases — commutativity, associativity, idempotence, convergence on random op interleavings. Randomized testing finds bugs; it does not prove their absence.
+The Rust core in `crates/axiom-core` is exercised by 31 property tests over 62,000 randomly generated cases on the full nightly run (31 × 2,000, set by the `PROPTEST_CASES` env var; per-commit CI runs a faster 7,936-case subset) — commutativity, associativity, idempotence, convergence on random op interleavings. Randomized testing finds bugs; it does not prove their absence.
 
 ### Trace-validated
 

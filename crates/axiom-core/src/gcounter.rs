@@ -150,6 +150,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// Monotonicity (mirrors GCounter.tla's `Monotonic`): the merged value
         /// dominates both operands.
         #[test]

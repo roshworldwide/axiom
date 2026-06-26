@@ -14,7 +14,8 @@ The thing I cared most about is **not overclaiming**. So, precisely:
 - **machine-proved (TLAPS, unbounded):** exactly two narrow lemmas — G-Counter
   merge commutativity (11 obligations) and acoustic-auth freshness (3) — not
   whole data types.
-- **property-tested:** 31 properties, 8,912 generated cases.
+- **property-tested:** 31 properties, 62,000 generated cases on the full nightly
+  run (per-commit CI runs a faster 7,936-case subset).
 - **trace-validated:** G-Counter, OR-Set, and RGA (each with a negativity check).
 
 There's also a security case study — an acoustic-authentication protocol — showing

@@ -322,6 +322,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// Order-independent convergence (the KEY property): merging two
         /// replicas in either order yields the same visible sequence.
         #[test]

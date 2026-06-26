@@ -218,6 +218,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// Convergence (SEC): merging in either direction yields the same state,
         /// and the same `contains` answers — for any two-replica interleaving.
         #[test]

@@ -53,3 +53,18 @@ pub use orset::{ORSet, ORSetOp, TlaORSetState};
 pub use pncounter::{PNCounter, PNCounterOp, TlaPNCounterState};
 pub use rga::{ElementId, Rga, TlaRgaState};
 pub use vector_clock::{ReplicaId, VectorClock};
+
+/// Per-property proptest case count, shared by every `proptest!` block.
+///
+/// Overridable via the `PROPTEST_CASES` environment variable. Defaults to 256
+/// (the proptest default — fast, used by per-commit CI); the nightly job sets
+/// `PROPTEST_CASES=2000` for the full run. Total generated cases =
+/// (number of properties) × this value. See `METRICS.md`.
+#[cfg(test)]
+pub(crate) fn proptest_cases() -> u32 {
+    std::env::var("PROPTEST_CASES")
+        .ok()
+        .and_then(|s| s.parse::<u32>().ok())
+        .filter(|&n| n > 0)
+        .unwrap_or(256)
+}

@@ -1,0 +1,60 @@
+# Nightly heavy checks — NOT part of per-commit CI (slow / resource-heavy).
+# Runs manually (workflow_dispatch) or nightly. Two independent jobs:
+#   * large-tlc     — large-scale TLC exploration (see evaluation/large_run.md);
+#                     re-runs evaluation/large_run.sh on a hosted runner and
+#                     uploads its report (it may reach fewer states than the
+#                     committed reference run on the author's machine).
+#   * proptest-full — the FULL property-test suite (PROPTEST_CASES=2000 ->
+#                     31 properties x 2,000 = 62,000 cases) instead of the fast
+#                     ~7,936-case subset per-commit CI runs.
+name: Nightly heavy checks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC nightly
+
+permissions:
+  contents: read
+
+jobs:
+  large-tlc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330 # under the 6h job ceiling
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Run the large-scale TLC sweep
+        env:
+          XMX: "13g" # ubuntu-latest has ~16 GiB
+        run: |
+          bash evaluation/large_run.sh | tee large_run_ci.md
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: large-run-report
+          path: large_run_ci.md
+
+  proptest-full:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Full property-test run (PROPTEST_CASES=2000 -> 62,000 cases)
+        env:
+          PROPTEST_CASES: "2000"
+        run: cargo test --workspace --release

@@ -139,6 +139,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// Commutativity: the abstract state is independent of merge order.
         #[test]
         fn merge_is_commutative(a in pncounter(), b in pncounter()) {

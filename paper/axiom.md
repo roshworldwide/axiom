@@ -161,8 +161,9 @@ violations:
 | G-Counter merge commutativity | `GCounterProofs.tla` | 11 |
 | Freshness under bounded clock skew | `AcousticAuthProofs.tla` | 3 |
 
-**Property testing (proptest).** 31 property tests at 256–500 cases each
-(8,912 generated cases), plus 24 concrete unit/integration tests — 55 test
+**Property testing (proptest).** 31 property tests; the full nightly run generates 62,000 cases
+(31 × 2,000, via the `PROPTEST_CASES` env var; per-commit CI runs a faster
+7,936-case subset), plus 24 concrete unit/integration tests — 55 test
 functions total, all passing under `-D warnings`. Properties include partial-
 order laws of the vector clock, the four CRDTs' convergence/commutativity/
 idempotence, op-based convergence under arbitrary network reordering through

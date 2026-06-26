@@ -60,7 +60,7 @@ documented **large-scale run** explores far more — see the next section.
 ## Large-scale TLC run (coverage; not in per-commit CI)
 
 Command: `evaluation/large_run.sh` (also runnable via the manual / nightly
-`.github/workflows/large-tlc.yml`). Widened models in `evaluation/configs/`;
+`.github/workflows/nightly.yml`). Widened models in `evaluation/configs/`;
 full raw TLC output in `evaluation/large_run.md`. Reference run on **Apple M3,
 8 cores, 16 GiB RAM**, TLC **2.19** (tla2tools v1.7.4), JVM 17 `-Xmx10g`,
 `-workers auto`. Each model is explored to completion ("No error has been found").
@@ -101,9 +101,16 @@ Command: `cargo test --workspace` (rustc stable; `-D warnings`).
   5 integration tests (`tests/trace_replay.rs`). (`cargo test` output.)
 - Of the 55: **31 are proptest properties**; **24 are concrete unit/integration
   tests**. (Count of `#[test]` inside `proptest! { }` blocks vs outside.)
-- proptest **cases**: 27 properties at the default 256 cases + 4 properties at
-  500 cases (`axiom_verify.rs`, `ProptestConfig::with_cases(500)`):
-  `27 × 256 + 4 × 500 = 6,912 + 2,000 = 8,912` **generated cases**.
+- proptest **cases** scale with the `PROPTEST_CASES` env var. Every `proptest!`
+  block uses `ProptestConfig::with_cases(crate::proptest_cases())`, and
+  `proptest_cases()` (in `crates/axiom-core/src/lib.rs`) reads `PROPTEST_CASES`
+  (default **256**). Total = **31 properties × PROPTEST_CASES**:
+  - per-commit CI (default 256): `31 × 256 = 7,936` cases — kept fast.
+  - full / nightly run (`PROPTEST_CASES=2000`): `31 × 2,000 = 62,000`
+    **generated cases**, verified passing — the `proptest-full` job in
+    `.github/workflows/nightly.yml`. (CPU time scales linearly with the case
+    count, confirming the env var really drives it: 256→4000 took 1.3 s→14.5 s
+    of user time locally.)
 - Python: **7 pytest** smoke tests (`cd crates/axiom-py && pytest`), separate
   from `cargo test`.
 
@@ -134,8 +141,8 @@ the positive tests are not vacuous.
 
 - mdBook chapters: **11** (`ls docs/src/*.md` minus `SUMMARY.md`).
 - CI jobs: **6** in `ci.yml` (rust, tlc, tlaps, python, book, metrics) + **2**
-  in `pages.yml` (build, deploy) + **1** in `large-tlc.yml` (large-scale TLC,
-  **manual / nightly only — not per-commit**).
+  in `pages.yml` (build, deploy) + **2** in `nightly.yml` (large-scale TLC +
+  full property tests, **manual / nightly only — not per-commit**).
 
 ---
 
@@ -150,5 +157,5 @@ enforces it so the headline numbers can't silently diverge.
 - 14 obligations
 - 55 test functions
 - 31 property tests
-- 8,912 generated cases
+- 62,000 generated cases
 <!-- HEADLINE-END -->

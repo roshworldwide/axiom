@@ -57,7 +57,7 @@ Build **in order**, one focused PR per week, green CI before moving on.
 |-------|-------|-------------|
 | 0 | — | scaffold, CLAUDE.md, CI (this commit) |
 | 1 | 1–4 | TLA+ specs: Counter → G/PN-Counter (+TLAPS) → OR-Set → RGA |
-| 2 | 5–10 | Rust core: vector clock → counters → OR-Set → RGA+HLC → causal broadcast → verify+trace-replay (500+ proptests) |
+| 2 | 5–10 | Rust core: vector clock → counters → OR-Set → RGA+HLC → causal broadcast → verify+trace-replay (31 property tests, ~62k cases nightly) |
 | 3 | 11–14 | Acoustic Auth protocol spec + attacker models (replay/relay/freshness) |
 | 4 | 15–20 | paper, PyO3 bindings, The Axiom Book, launch |
 
