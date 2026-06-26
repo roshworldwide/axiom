@@ -10,7 +10,7 @@ The discipline behind this chapter is simple: every assurance term means exactly
 |-------|---------------|----------------|
 | **model-checked (TLC, bounded)** | Exhaustive state exploration up to stated finite bounds — every reachable state checked, no violation found | All six model-checked specs (the warm-up Counter, the four CRDTs, and the acoustic-auth model): 62,039 distinct states across the suite |
 | **machine-proved (TLAPS)** | A deductive, *unbounded* proof — holds for all inputs, no finite bound | Two narrow lemmas, 14 proof obligations total |
-| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 62,000 generated cases on the full nightly run (per-commit CI runs a 7,936-case subset) — plus 55 test functions overall |
+| **property-tested (proptest)** | Randomized inputs checked against a property | 31 properties, 62,000 generated cases on the full nightly run (per-commit CI runs a 7,936-case subset) — plus 56 test functions overall |
 | **trace-validated** | A TLC-pinned execution trace replayed on the Rust impl, matching the spec's state | G-Counter, OR-Set, RGA |
 
 ### Model-checked (TLC, bounded)
@@ -45,7 +45,7 @@ The Rust core in `crates/axiom-core` is exercised by 31 property tests over 62,0
 
 ### Trace-validated
 
-`crates/axiom-core/tests/trace_replay.rs` takes TLC-pinned traces for the G-Counter, OR-Set, and RGA and replays them through the Rust implementation, confirming the code reproduces each spec's state via the `tla_state()` refinement mapping. Each is compared at the type's observable abstraction (component counts, set membership, the visible id sequence + tombstones). The OR-Set and RGA replays each carry a negativity check — perturbing the trace makes the match fail, so those two positive tests are not vacuous. The G-Counter replay has no negativity check, so its non-vacuity is not independently demonstrated. (Trace-validated covers all three; negativity-checked replay covers OR-Set and RGA.)
+`crates/axiom-core/tests/trace_replay.rs` takes TLC-pinned traces for the G-Counter, OR-Set, and RGA and replays them through the Rust implementation, confirming the code reproduces each spec's state via the `tla_state()` refinement mapping. Each is compared at the type's observable abstraction (component counts, set membership, the visible id sequence + tombstones), and each carries a negativity check: perturbing the trace — dropping the G-Counter's load-bearing merge, the OR-Set's concurrent re-add, or the RGA's delete — makes the match fail, so the positive tests are not vacuous.
 
 ## What is NOT claimed
 

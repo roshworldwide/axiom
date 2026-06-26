@@ -97,9 +97,9 @@ Docker — there is no arm64 `tlapm`). Tool: tlapm **1.6.0-pre**, Z3 backend.
 
 Command: `cargo test --workspace` (rustc stable; `-D warnings`).
 
-- **55 test functions**, all passing: 50 in the `axiom-core` lib unit tests +
-  5 integration tests (`tests/trace_replay.rs`). (`cargo test` output.)
-- Of the 55: **31 are proptest properties**; **24 are concrete unit/integration
+- **56 test functions**, all passing: 50 in the `axiom-core` lib unit tests +
+  6 integration tests (`tests/trace_replay.rs`). (`cargo test` output.)
+- Of the 56: **31 are proptest properties**; **25 are concrete unit/integration
   tests**. (Count of `#[test]` inside `proptest! { }` blocks vs outside.)
 - proptest **cases** scale with the `PROPTEST_CASES` env var. Every `proptest!`
   block uses `ProptestConfig::with_cases(crate::proptest_cases())`, and
@@ -126,13 +126,11 @@ TLC run pins the expected state:
   `<<counter,replica>>` ids are fed into the impl (`insert_after_with_id`) so the
   id tie-break matches the spec's.
 
-**OR-Set and RGA** each have a **negativity check** (perturb the trace → the
-match fails), confirming those two positive tests are not vacuous. **The
-G-Counter replay has no negativity check**, so its non-vacuity is not
-independently demonstrated — its positive test passes, but it is, by this
-standard, vacuous. So: trace-validated (genuine positive replay) covers **3
-CRDTs (G-Counter, OR-Set, RGA)**; negativity-checked replay covers **2 (OR-Set,
-RGA)**.
+**Each** of the three has a **negativity check** (perturb the trace → the match
+fails), confirming the positive tests are not vacuous: drop the G-Counter's
+load-bearing merge, the OR-Set's concurrent re-add, or the RGA's delete, and the
+replayed state diverges from the pinned one. So trace-validated covers **3 CRDTs
+(G-Counter, OR-Set, RGA)**, each with a negativity check.
 
 ## Code size
 
@@ -162,7 +160,7 @@ enforces it so the headline numbers can't silently diverge.
 - 4 CRDTs
 - 2 TLAPS proofs
 - 14 obligations
-- 55 test functions
+- 56 test functions
 - 31 property tests
 - 62,000 generated cases
 <!-- HEADLINE-END -->

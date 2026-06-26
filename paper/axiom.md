@@ -178,7 +178,7 @@ of the explored state space.
 
 **Property testing (proptest).** 31 property tests; the full nightly run generates 62,000 cases
 (31 × 2,000, via the `PROPTEST_CASES` env var; per-commit CI runs a faster
-7,936-case subset), plus 24 concrete unit/integration tests — 55 test
+7,936-case subset), plus 25 concrete unit/integration tests — 56 test
 functions total, all passing under `-D warnings`. Properties include partial-
 order laws of the vector clock, the four CRDTs' convergence/commutativity/
 idempotence, op-based convergence under arbitrary network reordering through
@@ -188,10 +188,11 @@ CBCAST, and MessagePack round-trips.
 OR-Set, and RGA replay on the implementation and match the spec-computed final
 state — compared at each type's observable abstraction (component counts, set
 membership, and the visible id sequence + tombstones, respectively), with the
-trace's ids fed into the RGA so the tie-break matches the spec. The OR-Set and
-RGA replays each carry a negativity check (perturbing the trace makes the match
-fail); the G-Counter replay has none, so its non-vacuity is not independently
-demonstrated.
+trace's ids fed into the RGA so the tie-break matches the spec. Each of the
+three replays carries a negativity check (perturbing the trace makes the match
+fail) — drop the G-Counter's load-bearing merge, the OR-Set's concurrent re-add,
+or the RGA's delete, and the replayed state diverges — so no positive test is
+vacuous.
 
 **Non-vacuity.** For OR-Set, RGA, and each acoustic-auth defense, we ran
 deliberately-false invariants and confirmed TLC produces a concrete
