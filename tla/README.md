@@ -63,7 +63,7 @@ succeeds *within these finite bounds*, not a proof for all parameters. That the
 single-use check is load-bearing was confirmed by removing the `accepts[t] = 0`
 conjunct — TLC then finds a short trace accepting a token twice.
 
-**Relay impossibility (Week 13).** An acoustic environment is modeled as an
+**Relay resistance (Week 13).** An acoustic environment is modeled as an
 opaque *fingerprint* constant `env[t]`; `Accept` requires the verifier's
 environment to equal the token's. So a token captured in environment A and
 relayed to a verifier in environment B is rejected. TLC confirms
