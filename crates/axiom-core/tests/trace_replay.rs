@@ -45,17 +45,15 @@ struct GCounterTrace {
     expected: BTreeMap<String, BTreeMap<String, u64>>,
 }
 
-#[test]
-fn gcounter_trace_replay_matches_spec() {
-    let trace: GCounterTrace = serde_json::from_str(&load("gcounter.json")).unwrap();
-    assert_eq!(trace.crdt, "gcounter");
-
+/// Replay a G-Counter trace; returns per-replica component counts
+/// (replica -> {component -> count}, zero-filled over all replicas) so both the
+/// positive test and the negativity check can reuse it.
+fn replay_gcounter(trace: &GCounterTrace) -> BTreeMap<u64, BTreeMap<u64, u64>> {
     let mut reps: BTreeMap<u64, GCounter> = trace
         .replicas
         .iter()
         .map(|&r| (r, GCounter::new(ReplicaId(r))))
         .collect();
-
     for op in &trace.ops {
         match op {
             GcOp::Inc { r } => {
@@ -67,15 +65,45 @@ fn gcounter_trace_replay_matches_spec() {
             }
         }
     }
+    trace
+        .replicas
+        .iter()
+        .map(|&r| {
+            let counts = reps[&r].tla_state().counts;
+            let row = trace
+                .replicas
+                .iter()
+                .map(|&c| (c, counts.get(&ReplicaId(c)).copied().unwrap_or(0)))
+                .collect();
+            (r, row)
+        })
+        .collect()
+}
 
+/// The pinned per-replica component counts from the fixture's `expected` block.
+fn gcounter_expected(trace: &GCounterTrace) -> BTreeMap<u64, BTreeMap<u64, u64>> {
+    trace
+        .expected
+        .iter()
+        .map(|(r, row)| {
+            let r = r.parse::<u64>().expect("replica key");
+            let row = row
+                .iter()
+                .map(|(c, &v)| (c.parse::<u64>().expect("component key"), v))
+                .collect();
+            (r, row)
+        })
+        .collect()
+}
+
+#[test]
+fn gcounter_trace_replay_matches_spec() {
+    let trace: GCounterTrace = serde_json::from_str(&load("gcounter.json")).unwrap();
+    assert_eq!(trace.crdt, "gcounter");
+    let got = replay_gcounter(&trace);
+    let want = gcounter_expected(&trace);
     for &r in &trace.replicas {
-        let got = reps[&r].tla_state().counts;
-        let want = &trace.expected[&r.to_string()];
-        for &c in &trace.replicas {
-            let g = got.get(&ReplicaId(c)).copied().unwrap_or(0);
-            let w = want.get(&c.to_string()).copied().unwrap_or(0);
-            assert_eq!(g, w, "replica {r} component {c}");
-        }
+        assert_eq!(got[&r], want[&r], "replica {r} component counts");
     }
 }
 
@@ -253,10 +281,32 @@ fn rga_trace_replay_matches_spec() {
     }
 }
 
-// ---- Negativity checks: give the OR-Set and RGA positive tests teeth -------
-// Each perturbs the pinned trace and confirms the match FAILS, so those two
-// positive tests are not vacuous. NOTE: the G-Counter replay above has NO
-// negativity check, so its non-vacuity is not independently demonstrated.
+// ---- Negativity checks: give every positive test above teeth ---------------
+// Each perturbs the pinned trace and confirms the match FAILS, so all three
+// positive tests (G-Counter, OR-Set, RGA) are not vacuous.
+
+#[test]
+fn gcounter_negative_dropping_merge_changes_component_counts() {
+    let mut trace: GCounterTrace = serde_json::from_str(&load("gcounter.json")).unwrap();
+    // Op #6 (0-based) is `merge to=3 from=1` — how replica 3 learns r1's and r2's
+    // increments. Drop it and replica 3 keeps only its own increment, so its
+    // component counts must diverge from the pinned final state.
+    trace.ops.remove(6);
+    let got = replay_gcounter(&trace);
+    let want = gcounter_expected(&trace);
+    eprintln!(
+        "[gcounter negative] dropped the merge to r3 -> r3 counts {:?} (pinned was {:?})",
+        got[&3], want[&3]
+    );
+    assert_ne!(
+        got[&3], want[&3],
+        "perturbing the trace must change replica 3's component counts"
+    );
+    assert_eq!(
+        got[&3][&1], 0,
+        "replica 3 must no longer know r1's increments (the merge was dropped)"
+    );
+}
 
 #[test]
 fn orset_negative_dropping_concurrent_add_breaks_membership() {

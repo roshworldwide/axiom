@@ -34,15 +34,15 @@ Axiom is built spec-first and keeps every assurance claim calibrated to *how* it
 was established. The canonical figures live in [`METRICS.md`](METRICS.md) (which
 records the command behind each), and a CI check fails if these drift. Axiom is
 **4 CRDTs** plus a protocol case study, with **2 TLAPS proofs**
-(**14 obligations**) and **55 test functions**:
+(**14 obligations**) and **56 test functions**:
 
 | Layer | Technique | Result |
 |-------|-----------|--------|
 | TLA+ specs | **model-checked (TLC, bounded)** | **6 model-checked specs** (Counter, G/PN-Counter, OR-Set, RGA, AcousticAuth) — per-commit CI checks **62,039 distinct states**, no violations (bounds in [`tla/README.md`](tla/README.md)); large-scale figures below |
 | G-Counter merge | **machine-proved (TLAPS)** | `MergeVec(u,v) = MergeVec(v,u)` for all vectors — all 11 obligations discharged ([`tla/GCounterProofs.tla`](tla/GCounterProofs.tla)) |
 | Acoustic-auth freshness | **machine-proved (TLAPS)** | real age `< TTL + MaxSkew` under bounded clock skew — all 3 obligations ([`tla/AcousticAuthProofs.tla`](tla/AcousticAuthProofs.tla)) |
-| Rust core | **property-tested (proptest)** | **31 property tests** — **62,000 generated cases** on the full nightly run (31 × 2,000 via `PROPTEST_CASES`; per-commit CI runs a faster 7,936-case subset) + 24 unit/integration = **55 test functions** |
-| Spec ↔ code | **trace-validated** | TLC-pinned op traces for **G-Counter, OR-Set, and RGA**, replayed on the Rust impl, reproduce the spec's state; **OR-Set and RGA** each carry a negativity check (the G-Counter replay does not) ([trace_replay.rs](crates/axiom-core/tests/trace_replay.rs)) |
+| Rust core | **property-tested (proptest)** | **31 property tests** — **62,000 generated cases** on the full nightly run (31 × 2,000 via `PROPTEST_CASES`; per-commit CI runs a faster 7,936-case subset) + 25 unit/integration = **56 test functions** |
+| Spec ↔ code | **trace-validated** | TLC-pinned op traces for **G-Counter, OR-Set, and RGA**, replayed on the Rust impl, reproduce the spec's state — **each with a negativity check** ([trace_replay.rs](crates/axiom-core/tests/trace_replay.rs)) |
 
 **Scale (coverage).** Per-commit CI runs a fast bounded subset (the 62,039
 states above). A separate documented large-scale run reaches
