@@ -48,7 +48,7 @@ mod tests {
     }
 
     proptest! {
-        #![proptest_config(ProptestConfig::with_cases(500))]
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
 
         /// G-Counters merge to the same state regardless of merge order.
         #[test]

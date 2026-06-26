@@ -247,6 +247,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// Op-based G-Counters converge across replicas no matter how the
         /// network reorders delivery (causal broadcast + commutative ops).
         #[test]

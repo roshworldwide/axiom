@@ -185,6 +185,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// happens-before is irreflexive: a clock never happens-before itself.
         #[test]
         fn happens_before_is_irreflexive(a in clock()) {

@@ -174,6 +174,8 @@ mod tests {
     }
 
     proptest! {
+        #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
+
         /// A sequence of ticks is strictly increasing (monotonic + unique),
         /// whatever the physical-time readings (including going backwards).
         #[test]
