@@ -188,8 +188,10 @@ CBCAST, and MessagePack round-trips.
 OR-Set, and RGA replay on the implementation and match the spec-computed final
 state — compared at each type's observable abstraction (component counts, set
 membership, and the visible id sequence + tombstones, respectively), with the
-trace's ids fed into the RGA so the tie-break matches the spec. Each has a
-negativity check (perturbing the trace makes the match fail).
+trace's ids fed into the RGA so the tie-break matches the spec. The OR-Set and
+RGA replays each carry a negativity check (perturbing the trace makes the match
+fail); the G-Counter replay has none, so its non-vacuity is not independently
+demonstrated.
 
 **Non-vacuity.** For OR-Set, RGA, and each acoustic-auth defense, we ran
 deliberately-false invariants and confirmed TLC produces a concrete

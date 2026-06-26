@@ -16,7 +16,8 @@ The thing I cared most about is **not overclaiming**. So, precisely:
   whole data types.
 - **property-tested:** 31 properties, 62,000 generated cases on the full nightly
   run (per-commit CI runs a faster 7,936-case subset).
-- **trace-validated:** G-Counter, OR-Set, and RGA (each with a negativity check).
+- **trace-validated:** G-Counter, OR-Set, and RGA; OR-Set and RGA each with a
+  negativity check (the G-Counter replay does not have one yet).
 
 There's also a security case study — an acoustic-authentication protocol — showing
 the same method carries from data structures to a protocol. Each defense (replay,

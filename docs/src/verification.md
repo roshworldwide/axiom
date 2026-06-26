@@ -45,7 +45,7 @@ The Rust core in `crates/axiom-core` is exercised by 31 property tests over 62,0
 
 ### Trace-validated
 
-`crates/axiom-core/tests/trace_replay.rs` takes TLC-pinned traces for the G-Counter, OR-Set, and RGA and replays them through the Rust implementation, confirming the code reproduces each spec's state via the `tla_state()` refinement mapping. Each is compared at the type's observable abstraction (component counts, set membership, the visible id sequence + tombstones), and each carries a negativity check: perturbing the trace makes the match fail, so the positive tests are not vacuous.
+`crates/axiom-core/tests/trace_replay.rs` takes TLC-pinned traces for the G-Counter, OR-Set, and RGA and replays them through the Rust implementation, confirming the code reproduces each spec's state via the `tla_state()` refinement mapping. Each is compared at the type's observable abstraction (component counts, set membership, the visible id sequence + tombstones). The OR-Set and RGA replays each carry a negativity check — perturbing the trace makes the match fail, so those two positive tests are not vacuous. The G-Counter replay has no negativity check, so its non-vacuity is not independently demonstrated. (Trace-validated covers all three; negativity-checked replay covers OR-Set and RGA.)
 
 ## What is NOT claimed
 

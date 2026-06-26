@@ -27,4 +27,5 @@ membership — so the Uuid-vs-`<<replica,counter>>` tag encoding is irrelevant),
 and `RGATrace` (the visible id sequence + tombstone set, with the trace's
 `<<counter,replica>>` ids fed into the impl so the id tie-break matches the
 spec). Each is compared at the type's observable abstraction, never raw internal
-encoding, and each Rust replay carries a negativity check.
+encoding; the OR-Set and RGA Rust replays each carry a negativity check (the
+G-Counter replay does not).

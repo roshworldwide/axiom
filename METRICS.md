@@ -126,8 +126,13 @@ TLC run pins the expected state:
   `<<counter,replica>>` ids are fed into the impl (`insert_after_with_id`) so the
   id tie-break matches the spec's.
 
-Each has a **negativity check** (perturb the trace → the match fails), confirming
-the positive tests are not vacuous.
+**OR-Set and RGA** each have a **negativity check** (perturb the trace → the
+match fails), confirming those two positive tests are not vacuous. **The
+G-Counter replay has no negativity check**, so its non-vacuity is not
+independently demonstrated — its positive test passes, but it is, by this
+standard, vacuous. So: trace-validated (genuine positive replay) covers **3
+CRDTs (G-Counter, OR-Set, RGA)**; negativity-checked replay covers **2 (OR-Set,
+RGA)**.
 
 ## Code size
 

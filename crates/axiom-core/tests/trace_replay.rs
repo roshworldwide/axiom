@@ -253,9 +253,10 @@ fn rga_trace_replay_matches_spec() {
     }
 }
 
-// ---- Negativity checks: the positive tests above have teeth ----------------
-// Each perturbs the pinned trace and confirms the match FAILS, so a passing
-// positive test is not vacuous.
+// ---- Negativity checks: give the OR-Set and RGA positive tests teeth -------
+// Each perturbs the pinned trace and confirms the match FAILS, so those two
+// positive tests are not vacuous. NOTE: the G-Counter replay above has NO
+// negativity check, so its non-vacuity is not independently demonstrated.
 
 #[test]
 fn orset_negative_dropping_concurrent_add_breaks_membership() {
