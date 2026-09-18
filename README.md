@@ -10,7 +10,7 @@ can be checked against the verified spec.
 
 > **Status:** Phases 1–3 complete — TLA+ specs, the Rust core, and the
 > acoustic-auth security case study. Phase 4 (paper, Python bindings, book) is
-> next. See [`CLAUDE.md`](CLAUDE.md) for the build plan and conventions.
+> next.
 
 ## Why this is unusual
 

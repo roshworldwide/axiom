@@ -85,7 +85,6 @@ checking, not an unbounded proof. The actual guarantees come from:
 
 A bigger state count buys more confidence that no small-scale counterexample was
 missed; it does not, by itself, upgrade "model-checked (bounded)" to "proved."
-See the [claims policy](../CLAUDE.md#claims-policy-read-this-before-writing-any-result-down).
 
 ## Notes on bounds (why these numbers)
 

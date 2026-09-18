@@ -1,5 +1,3 @@
-# Build "The Axiom Book" (mdBook) and deploy it to GitHub Pages.
-# Requires: Settings -> Pages -> Build and deployment -> Source = "GitHub Actions".
 name: Deploy The Axiom Book to Pages
 
 on:
@@ -12,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# Allow one concurrent deployment; don't cancel an in-progress production deploy.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -34,10 +31,6 @@ jobs:
           tar -xzf mdbook.tar.gz
           echo "$PWD" >> "$GITHUB_PATH"
 
-      # ONE-TIME SETUP: enable Pages at Settings -> Pages -> Build and deployment
-      # -> Source = "GitHub Actions". The default GITHUB_TOKEN cannot enable it
-      # via the API, so this deploy fails until that toggle is set; afterward it
-      # publishes the book on every push to main.
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

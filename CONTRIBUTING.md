@@ -11,7 +11,7 @@ as much as about code.
 - **Calibrated claims.** Use the precise terms and never conflate them:
   *model-checked* (TLC, bounded), *machine-proved* (TLAPS, unbounded),
   *property-tested* (proptest), *trace-validated*. Never write "proven" for a
-  model-checked or tested result. See [`CLAUDE.md`](CLAUDE.md).
+  model-checked or tested result.
 - **Spec first.** A new CRDT gets a TLA+ spec + a TLC config *before* Rust; the
   Rust type exposes `tla_state()` mirroring the spec, kept in sync with it.
 - **Every change is green:** `cargo fmt --check`, `cargo clippy` (warnings

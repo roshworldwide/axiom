@@ -1,15 +1,3 @@
-//! Cross-CRDT verification harness.
-//!
-//! Generic convergence checking that complements the per-CRDT proptests: build
-//! several replicas, merge them in different orders, and assert they all reach
-//! the same state. Because every CRDT here is a state-based CvRDT (its merge is
-//! a join — commutative, associative, idempotent), the joined state must be
-//! independent of merge order. This is the executable counterpart of the
-//! `Convergent` / `Monotonic` properties model-checked in the TLA+ specs.
-
-/// Fold-merge the replicas selected by `order` (indices into `replicas`) into a
-/// single joined value, using `merge` as the in-place join. `order` must be
-/// non-empty.
 pub fn join_in_order<C: Clone>(replicas: &[C], order: &[usize], merge: impl Fn(&mut C, &C)) -> C {
     let mut acc = replicas[order[0]].clone();
     for &i in order.iter().skip(1) {
@@ -28,18 +16,16 @@ mod tests {
     use crate::ReplicaId;
     use proptest::prelude::*;
 
-    const N: usize = 4; // replicas
+    const N: usize = 4;
 
     fn rid(n: usize) -> ReplicaId {
         ReplicaId(n as u64)
     }
 
-    /// Two independent permutations of `0..N`, for merging in different orders.
     fn perm() -> impl Strategy<Value = Vec<usize>> {
         Just((0..N).collect::<Vec<_>>()).prop_shuffle()
     }
 
-    /// `N` lists of random ops, one list per replica.
     fn op_lists<T: std::fmt::Debug + Clone>(
         each: impl Strategy<Value = T>,
         max_len: usize,
@@ -50,7 +36,6 @@ mod tests {
     proptest! {
         #![proptest_config(ProptestConfig::with_cases(crate::proptest_cases()))]
 
-        /// G-Counters merge to the same state regardless of merge order.
         #[test]
         fn gcounter_merges_converge(
             specs in op_lists((0usize..N, 1u64..6), 6),
@@ -69,7 +54,6 @@ mod tests {
             prop_assert_eq!(ja.tla_state(), jb.tla_state());
         }
 
-        /// PN-Counters merge to the same state regardless of merge order.
         #[test]
         fn pncounter_merges_converge(
             specs in op_lists((any::<bool>(), 0usize..N, 1u64..6), 6),
@@ -89,7 +73,6 @@ mod tests {
             prop_assert_eq!(ja.tla_state(), jb.tla_state());
         }
 
-        /// OR-Sets merge to the same state regardless of merge order.
         #[test]
         fn orset_merges_converge(
             specs in op_lists((any::<bool>(), 0u8..4), 6),
@@ -108,7 +91,6 @@ mod tests {
             prop_assert_eq!(ja.tla_state(), jb.tla_state());
         }
 
-        /// RGAs merge to the same visible sequence regardless of merge order.
         #[test]
         fn rga_merges_converge(
             specs in op_lists((any::<bool>(), 0u8..6), 6),

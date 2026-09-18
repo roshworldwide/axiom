@@ -1,21 +1,3 @@
-//! TLC trace replay.
-//!
-//! Replays a TLA+-pinned operation trace on the Rust implementation and asserts
-//! the final state matches the state the spec computes. Each fixture under
-//! `tests/traces/` is pinned by TLC: the matching `tla/traces/<Crdt>Trace.tla`
-//! asserts `Done => <observable> = Expected`, so a clean TLC run (also enforced
-//! by the CI `tlc` job) confirms `Expected` IS the spec's result for the
-//! scripted ops. Reproducing it here connects the implementation to the spec by
-//! a replayed trace — "refinement validated by trace replay".
-//!
-//! Ids are reconciled at the right abstraction so incidental encoding cannot
-//! cause false mismatches, while the meaningful outcomes match exactly: G-Counter
-//! compares per-replica component counts; OR-Set compares per-replica membership
-//! (live elements), so tag encoding (`<<replica,counter>>` in TLA+ vs Uuid in
-//! Rust) is irrelevant; RGA compares the visible id sequence and the tombstone
-//! set, feeding the trace's `<<counter,replica>>` ids into the impl so the id
-//! tie-break matches the spec's.
-
 use std::collections::{BTreeMap, BTreeSet};
 
 use axiom_core::{ElementId, GCounter, Hlc, ORSet, ReplicaId, Rga};
@@ -25,8 +7,6 @@ fn load(name: &str) -> String {
     let path = format!("{}/tests/traces/{}", env!("CARGO_MANIFEST_DIR"), name);
     std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("read {path}: {e}"))
 }
-
-// ---- G-Counter -------------------------------------------------------------
 
 #[derive(Deserialize)]
 #[serde(tag = "t")]
@@ -45,9 +25,6 @@ struct GCounterTrace {
     expected: BTreeMap<String, BTreeMap<String, u64>>,
 }
 
-/// Replay a G-Counter trace; returns per-replica component counts
-/// (replica -> {component -> count}, zero-filled over all replicas) so both the
-/// positive test and the negativity check can reuse it.
 fn replay_gcounter(trace: &GCounterTrace) -> BTreeMap<u64, BTreeMap<u64, u64>> {
     let mut reps: BTreeMap<u64, GCounter> = trace
         .replicas
@@ -80,7 +57,6 @@ fn replay_gcounter(trace: &GCounterTrace) -> BTreeMap<u64, BTreeMap<u64, u64>> {
         .collect()
 }
 
-/// The pinned per-replica component counts from the fixture's `expected` block.
 fn gcounter_expected(trace: &GCounterTrace) -> BTreeMap<u64, BTreeMap<u64, u64>> {
     trace
         .expected
@@ -107,8 +83,6 @@ fn gcounter_trace_replay_matches_spec() {
     }
 }
 
-// ---- OR-Set (membership) ---------------------------------------------------
-
 #[derive(Deserialize)]
 #[serde(tag = "op")]
 enum OrSetOp {
@@ -129,8 +103,6 @@ struct OrSetTrace {
     expected_membership: BTreeMap<String, Vec<u8>>,
 }
 
-/// Replay an OR-Set trace; returns the per-replica live-element set the
-/// implementation reaches (so the negative check can reuse it).
 fn replay_orset(trace: &OrSetTrace) -> BTreeMap<u64, BTreeSet<u8>> {
     let mut reps: BTreeMap<u64, ORSet<u8>> =
         trace.replicas.iter().map(|&r| (r, ORSet::new())).collect();
@@ -177,8 +149,6 @@ fn orset_trace_replay_matches_spec() {
     }
 }
 
-// ---- RGA (visible sequence + tombstones) -----------------------------------
-
 #[derive(Deserialize)]
 #[serde(tag = "op")]
 enum RgaOp {
@@ -203,9 +173,6 @@ struct RgaTrace {
     expected_tombstones: Vec<[u64; 2]>,
 }
 
-/// `[counter, replica]` (the spec's `<<counter, replica>>` id) -> Rust ElementId.
-/// `wall = 0` makes the Rust `(wall, counter, replica)` order reduce to the
-/// spec's `(counter, replica)` tie-break.
 fn eid(p: [u64; 2]) -> ElementId {
     ElementId {
         hlc: Hlc {
@@ -220,10 +187,8 @@ fn unid(e: ElementId) -> [u64; 2] {
     [u64::from(e.hlc.counter), e.replica.0]
 }
 
-/// Per-replica (visible id sequence, tombstone set).
 type RgaView = BTreeMap<u64, (Vec<[u64; 2]>, BTreeSet<[u64; 2]>)>;
 
-/// Replay an RGA trace; returns per-replica (visible id sequence, tombstone set).
 fn replay_rga(trace: &RgaTrace) -> RgaView {
     let mut reps: BTreeMap<u64, Rga<u8>> = trace
         .replicas
@@ -281,16 +246,9 @@ fn rga_trace_replay_matches_spec() {
     }
 }
 
-// ---- Negativity checks: give every positive test above teeth ---------------
-// Each perturbs the pinned trace and confirms the match FAILS, so all three
-// positive tests (G-Counter, OR-Set, RGA) are not vacuous.
-
 #[test]
 fn gcounter_negative_dropping_merge_changes_component_counts() {
     let mut trace: GCounterTrace = serde_json::from_str(&load("gcounter.json")).unwrap();
-    // Op #6 (0-based) is `merge to=3 from=1` — how replica 3 learns r1's and r2's
-    // increments. Drop it and replica 3 keeps only its own increment, so its
-    // component counts must diverge from the pinned final state.
     trace.ops.remove(6);
     let got = replay_gcounter(&trace);
     let want = gcounter_expected(&trace);
@@ -311,9 +269,6 @@ fn gcounter_negative_dropping_merge_changes_component_counts() {
 #[test]
 fn orset_negative_dropping_concurrent_add_breaks_membership() {
     let mut trace: OrSetTrace = serde_json::from_str(&load("orset.json")).unwrap();
-    // Op #2 (0-based) is the concurrent re-add of element 1 (a fresh tag) that
-    // makes add-wins hold. Drop it: the only tag of 1 is then the one the remove
-    // tombstoned, so element 1 must vanish.
     trace.ops.remove(2);
     let got = replay_orset(&trace);
     eprintln!(
@@ -334,8 +289,6 @@ fn orset_negative_dropping_concurrent_add_breaks_membership() {
 #[test]
 fn rga_negative_dropping_delete_changes_visible_sequence() {
     let mut trace: RgaTrace = serde_json::from_str(&load("rga.json")).unwrap();
-    // Op #6 (0-based) is the delete of <<1,1>>. Drop it: <<1,1>> stays visible,
-    // so the sequence is [<<0,1>>, <<1,1>>, <<0,2>>], not the pinned 2-element one.
     trace.ops.remove(6);
     let got = replay_rga(&trace);
     eprintln!(

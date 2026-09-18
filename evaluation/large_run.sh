@@ -1,14 +1,4 @@
 #!/usr/bin/env bash
-# Large-scale TLC exploration: model-check widened CRDT instances to completion,
-# cumulatively exploring >= 1e8 distinct states. This is NOT part of per-commit
-# CI (it is slow + resource-heavy); run it manually or via the nightly workflow
-# (.github/workflows/large-tlc.yml). The committed evaluation/large_run.md is the
-# reference run on the author's machine.
-#
-# Env knobs:
-#   JAVA  - java binary (default: java; on macOS keg-only Temurin pass the path)
-#   JAR   - path to tla2tools.jar (downloaded if absent)
-#   XMX   - JVM max heap (default 10g)
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -54,9 +44,6 @@ run() {
   total=$(( total + ${d:-0} ))
 }
 
-# GCounter is the headline: a single model that alone exceeds 1e8 distinct
-# states. PNCounter and ORSet add harder (concurrent inc/dec, add/remove)
-# coverage to the cumulative total.
 run "GCounter — 3 replicas, MaxIncrements=13, symmetry  (headline, >1e8)" GCounter.tla "$CFG/GCounter.large.cfg"
 run "PNCounter — 3 replicas, MaxOps=3, symmetry" PNCounter.tla "$CFG/PNCounter.large.cfg"
 run "ORSet — 3 replicas, 2 elements, MaxAdds=2, symmetry" ORSet.tla "$CFG/ORSet.large.cfg"

@@ -1,10 +1,3 @@
-//! Python bindings for the Axiom CRDT runtime (via PyO3 + maturin).
-//!
-//! Exposes the four CRDTs with Pythonic APIs and MessagePack `to_bytes` /
-//! `from_bytes`, so a Python process can replicate shared state: serialize a
-//! replica, ship the bytes to a peer, and `merge` — convergence is guaranteed by
-//! the (TLA+-specified, property-tested) `axiom-core` underneath.
-
 use axiom_core::{GCounter, ORSet, PNCounter, ReplicaId, Rga};
 use pyo3::exceptions::{PyIndexError, PyValueError};
 use pyo3::prelude::*;
@@ -29,28 +22,23 @@ impl PyGCounter {
         }
     }
 
-    /// Increment this replica's component by one.
     fn increment(&mut self) {
         self.inner.increment();
     }
 
-    /// The counter's value (sum of components).
     fn value(&self) -> u64 {
         self.inner.value()
     }
 
-    /// Merge another replica's state in (component-wise max).
     fn merge(&mut self, other: &PyGCounter) {
         self.inner.merge(&other.inner);
     }
 
-    /// MessagePack-encode this replica's state.
     fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
         let bytes = rmp_serde::to_vec(&self.inner).map_err(to_bytes_err)?;
         Ok(PyBytes::new(py, &bytes))
     }
 
-    /// Decode a replica from MessagePack bytes.
     #[staticmethod]
     fn from_bytes(data: &[u8]) -> PyResult<Self> {
         Ok(Self {
@@ -86,7 +74,6 @@ impl PyPNCounter {
         self.inner.decrement();
     }
 
-    /// The net value `P - N` (may be negative).
     fn value(&self) -> i64 {
         self.inner.value()
     }
@@ -131,7 +118,6 @@ impl PyORSet {
         self.inner.add(element);
     }
 
-    /// Remove an element (tombstone its observed tags).
     fn discard(&mut self, element: &str) {
         self.inner.remove(&element.to_owned());
     }
@@ -144,7 +130,6 @@ impl PyORSet {
         self.contains(element)
     }
 
-    /// The present elements (in sorted order).
     fn elements(&self) -> Vec<String> {
         self.inner.iter().cloned().collect()
     }
@@ -189,18 +174,15 @@ impl PyRga {
         }
     }
 
-    /// Insert `value` at visible position `index` (clamped to the end).
     fn insert(&mut self, index: usize, value: String) {
         self.inner.insert(index, value);
     }
 
-    /// Append `value` to the end.
     fn append(&mut self, value: String) {
         let n = self.inner.len();
         self.inner.insert(n, value);
     }
 
-    /// Tombstone the element at visible position `index`.
     fn delete(&mut self, index: usize) -> PyResult<()> {
         let ids = self.inner.ids();
         let id = ids
@@ -210,7 +192,6 @@ impl PyRga {
         Ok(())
     }
 
-    /// The visible sequence as a list of strings.
     fn to_list(&self) -> Vec<String> {
         self.inner.to_vec().into_iter().cloned().collect()
     }

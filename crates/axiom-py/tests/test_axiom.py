@@ -1,10 +1,3 @@
-"""Smoke tests for the Axiom Python bindings.
-
-These mirror, in Python, a few of the Rust property tests: convergence under
-merge, add-wins, value-can-decrease, sequence convergence, and a MessagePack
-round-trip (the distributed-state path).
-"""
-
 from axiom import GCounter, PNCounter, ORSet, RGA
 
 
@@ -14,7 +7,6 @@ def test_gcounter_merge_converges():
     a.increment()
     a.increment()
     b.increment()
-    # Merge in both directions; values must agree.
     ab = GCounter.from_bytes(a.to_bytes())
     ab.merge(b)
     ba = GCounter.from_bytes(b.to_bytes())
@@ -33,19 +25,19 @@ def test_pncounter_value_can_decrease():
 
 def test_orset_concurrent_add_beats_remove():
     a = ORSet()
-    a.add("x")  # tag t1
-    b = ORSet.from_bytes(a.to_bytes())  # b observes t1
-    a.add("x")  # concurrent add, fresh tag
-    b.discard("x")  # tombstones only the observed t1
+    a.add("x")
+    b = ORSet.from_bytes(a.to_bytes())
+    a.add("x")
+    b.discard("x")
     a.merge(b)
-    assert "x" in a  # add wins
+    assert "x" in a
 
 
 def test_orset_remove_wins_when_observed():
     a = ORSet()
     a.add("y")
     b = ORSet.from_bytes(a.to_bytes())
-    b.discard("y")  # observed the only tag
+    b.discard("y")
     a.merge(b)
     assert "y" not in a
 
@@ -67,9 +59,9 @@ def test_rga_insert_order_and_delete():
     r = RGA(1)
     r.insert(0, "a")
     r.insert(1, "b")
-    r.insert(1, "c")  # newest-after-reference wins the spot
+    r.insert(1, "c")
     assert r.to_list() == ["a", "c", "b"]
-    r.delete(1)  # delete "c"
+    r.delete(1)
     assert r.to_list() == ["a", "b"]
 
 
